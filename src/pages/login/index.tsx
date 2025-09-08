@@ -36,12 +36,12 @@ export default function Login() {
   return (
     <section className="flex bg-muted h-screen relative">
       <div className="absolute flex items-center left-4 top-4 gap-1">
-        <img src={logo} alt="Logo" className="w-16 h-16" />
-        <h1 className="font-bagel text-3xl">StreetWear</h1>
+        <img src={logo} alt="Logo" className="md:w-16 w-12 h-12 md:h-16" />
+        <h1 className="font-bagel text-2xl md:text-3xl">StreetWear</h1>
       </div>
-      <div className="flex-1 flex justify-center">
-        <div className="flex flex-col gap-5 items-center w-[60%] max-w-[800px] justify-center bg-muted my-auto p-10 rounded-xl">
-          <h1 className="text-5xl font-bagel text-center">
+      <div className="flex-1 flex justify-center items-center">
+        <div className="flex flex-col gap-2 md:gap-5  items-center lg:w-[60%] w-full max-w-[800px] justify-center bg-muted my-auto p-10 rounded-xl">
+          <h1 className="text-3xl md:text-5xl font-bagel text-center">
             Welcome to your <br /> warehouse
           </h1>
           <form
@@ -74,7 +74,7 @@ export default function Login() {
           {error && <p className="text-red-500 text-center">{error}</p>}
         </div>
       </div>
-      <div className="flex items-center justify-center overflow-hidden flex-1 m-3 rounded-xl">
+      <div className="hidden items-center justify-center overflow-hidden flex-1 m-3 rounded-xl lg:flex">
         <img src={loginBg} alt="logo" className="object-cover w-full h-full" />
       </div>
     </section>

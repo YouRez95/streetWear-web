@@ -32,6 +32,7 @@ export const getImageUrl = (
 ): string => {
   const DEFAULT_IMAGE = type === "user" ? defaultImage : defaultProductImage;
   if (imageUrl && imageUrl.trim()) {
+    console.log(`${SERVER_URL}/${imageUrl.trim()}`);
     return `${SERVER_URL}/${imageUrl.trim()}`;
   }
   return DEFAULT_IMAGE;

@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useDeleteBonFaconnier } from "@/hooks/useFaconnier";
-import { cn } from "@/lib/utils";
+import { useDeleteBonFaconnier } from "@/hooks/useFaconnier"; // Changed hook
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 type DeleteBonDialogProps = {
   open: boolean;
@@ -21,22 +23,30 @@ type DeleteBonDialogProps = {
   bonId: string;
 };
 
-export const DeleteBonDialog = ({
+export function DeleteBonDialog({
   open,
   setOpen,
   bonNumber,
   bonId,
-}: DeleteBonDialogProps) => {
-  const { mutate: deleteBonMutation } = useDeleteBonFaconnier();
+}: DeleteBonDialogProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  // Use the correct mutation hook
+  const deleteBonMutation = useDeleteBonFaconnier();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   function handleChangeCode(e: React.ChangeEvent<HTMLInputElement>) {
     setCode(e.target.value);
     setError("");
   }
 
-  function handleDeleteBon() {
+  const closeDialog = () => {
+    setOpen(false);
+    setCode("");
+    setError("");
+  };
+
+  async function handleDeleteBon() {
     if (!code) {
       setError("Le code est requis");
       return;
@@ -46,67 +56,114 @@ export const DeleteBonDialog = ({
       setError("Le code est incorrect");
       return;
     }
+
     setError("");
-    //console.log('delete bon', bonNumber, bonId)
-    deleteBonMutation(bonId, {
-      onSuccess: (data) => {
-        if (data.status === "failed") {
-          return;
-        }
-        setCode("");
-        setOpen(false);
-      },
-    });
+
+    // Ensure the mutation object exists before using it
+    if (deleteBonMutation) {
+      deleteBonMutation.mutate(bonId, {
+        onSuccess: (data) => {
+          // Check for failure from the server response if applicable
+          if (data && data.status === "failed") {
+            // You can set an error from the server here if needed
+            return;
+          }
+          closeDialog();
+        },
+      });
+    }
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={() => {
-        setCode("");
-        setError("");
-        setOpen(false);
-      }}
-    >
-      <DialogContent className="bg-foreground rounded-xl p-5 shadow-sm border space-y-3">
-        <DialogHeader>
-          <DialogTitle className="text-xl">
-            Supprimer le bon #{bonNumber}
+    <Dialog open={open} onOpenChange={closeDialog}>
+      <DialogContent
+        className={cn(
+          "bg-foreground flex flex-col",
+          isMobile
+            ? "h-full max-w-full overflow-y-auto [&>button]:hidden"
+            : "sm:max-w-[525px]"
+        )}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        {/* Close Button on Mobile */}
+        {isMobile && (
+          <div>
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        )}
+
+        <DialogHeader className="flex flex-col gap-3 pb-4 pt-5 md:pt-0">
+          <DialogTitle
+            className={cn(
+              "text-destructive text-left mb-2 flex gap-2 items-center",
+              isMobile ? "text-xl" : "text-xl"
+            )}
+          >
+            <Trash2 className="w-10 h-10 bg-destructive p-2 rounded-lg text-foreground" />
+            Supprimer le bon n°{bonNumber}
           </DialogTitle>
-          <DialogDescription className="text-background text-base">
-            Êtes-vous sûr de vouloir supprimer ce bon ? Cette action ne peut
-            être annulée.
+          <DialogDescription className="text-background/80 text-base text-left">
+            Êtes-vous sûr de vouloir supprimer ce bon ? Cette action est
+            irréversible.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-4 ">
-          <Label htmlFor="code" className="text-left text-base">
-            Code
-          </Label>
-          <Input
-            id="code"
-            value={code}
-            onChange={handleChangeCode}
-            className="col-span-3 border-background/50"
-          />
+        {/* Form Content */}
+        <div className="flex-1 px-2 md:px-0">
+          <div className="grid gap-4 py-4">
+            <div className="space-y-3">
+              <Label
+                htmlFor="code"
+                className="text-base font-medium text-background block"
+              >
+                Pour confirmer, tapez "Supprimer" dans le champ ci-dessous
+              </Label>
+              <Input
+                id="code"
+                value={code}
+                onChange={handleChangeCode}
+                className="border-background/30 placeholder:text-background/30 hover:border-background/50 focus:border-destructive/50 bg-foreground text-background p-3 rounded-lg transition-colors"
+                placeholder="Tapez Supprimer"
+              />
+            </div>
+          </div>
         </div>
 
-        <DialogFooter
-          className={cn(
-            "flex items-center",
-            error
-              ? "justify-between sm:justify-between"
-              : "justify-end sm:justify-end"
+        {/* Sticky Footer */}
+        <DialogFooter className="flex flex-col gap-3 pt-4">
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg border border-destructive/20 w-full">
+              {error}
+            </div>
           )}
-        >
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="flex items-center gap-2">
+          <div className="flex gap-3">
             <DialogClose asChild>
-              <Button variant="ghost" className="border border-background/50">
+              <Button
+                type="button"
+                variant="ghost"
+                className={cn(
+                  "flex-1 border text-base",
+                  isMobile
+                    ? "border-background/50 text-background"
+                    : "border-background/30"
+                )}
+              >
                 Annuler
               </Button>
             </DialogClose>
-            <Button variant={"destructive"} onClick={handleDeleteBon}>
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1 text-base"
+              onClick={handleDeleteBon}
+            >
               Supprimer
             </Button>
           </div>
@@ -114,4 +171,4 @@ export const DeleteBonDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
+}

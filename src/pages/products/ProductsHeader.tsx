@@ -78,12 +78,16 @@ export default function ProductsHeader() {
   if (isLoading) return <div>Chargement...</div>;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-3 w-full">
-      {stats.map((stat) => {
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 w-full">
+      {stats.map((stat, index) => {
         return (
           <div
             key={stat.key}
-            className="flex flex-col gap-2 bg-foreground rounded-lg p-3 shadow-sm border"
+            className={`flex flex-col gap-2 bg-foreground rounded-lg p-3 shadow-sm border ${
+              index === stats.length - 1
+                ? "col-span-2 lg:col-span-2 xl:col-span-1"
+                : ""
+            }`}
           >
             <div className="flex items-center gap-2">
               <div className="p-2 bg-secondary rounded-full">

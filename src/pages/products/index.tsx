@@ -30,13 +30,13 @@ export default function Products() {
   const [openTransferDialogStylist, setOpenTransferDialogStylist] =
     useState(false);
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden gap-4">
+    <div className="min-h-screen w-full flex flex-col gap-4">
       <ProductsHeader />
 
-      <div className="flex-1 overflow-hidden rounded-xl bg-foreground shadow-sm border flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div className="flex-1 rounded-xl bg-foreground shadow-sm border flex flex-col pb-20">
+        <div className="flex-1">
           {/* This is the scrollable content area */}
-          <div className="min-h-full p-4">
+          <div className="h-full p-4">
             <ProductSearch setSearch={setSearch} search={search} />
             <ProductsTable
               setOpenSheet={setOpenSheet}
@@ -105,7 +105,7 @@ export default function Products() {
         </div>
 
         {/* Sticky pagination bar at the bottom */}
-        <div className="h-16 bg-muted-foreground sticky bottom-0 shrink-0 mt-auto">
+        <div className="fixed bottom-0 left-0 right-0 h-16 bg-muted-foreground">
           <PaginationComponent
             page={page}
             setPage={setPage}

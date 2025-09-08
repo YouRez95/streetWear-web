@@ -10,7 +10,7 @@ type LayoutProps = HTMLAttributes<HTMLElement> & {
 export const AppLayout = ({ children, className, ...props }: LayoutProps) => {
   return (
     <main
-      className={cn("flex flex-row h-screen bg-muted", className)}
+      className={cn("flex flex-col min-h-screen bg-muted", className)}
       {...props}
     >
       {children}
@@ -27,7 +27,7 @@ export const Sidebar = ({ className, children, ...props }: LayoutProps) => {
 };
 
 export const Content = ({ children, className, ...props }: LayoutProps) => (
-  <div className={cn("flex-1 overflow-auto", className)} {...props}>
+  <div className={cn("flex-1", className)} {...props}>
     {children}
   </div>
 );

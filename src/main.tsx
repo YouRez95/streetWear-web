@@ -24,6 +24,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+(window as any).queryClient = queryClient;
+
 const router = createBrowserRouter([
   {
     path: "/",

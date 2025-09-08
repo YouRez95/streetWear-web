@@ -1,6 +1,7 @@
 // apiClient.ts
 import axios, { AxiosError } from "axios";
 import { SERVER_URL } from "./env";
+import { useUserStore } from "@/store/userStore";
 
 // Example: replace with your token storage logic
 const getToken = async (): Promise<string | null> => {
@@ -36,7 +37,11 @@ apiClient.interceptors.response.use(
       // Example: logout
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user");
-      // window.location.href = "/login";
+      const { setLogout } = useUserStore.getState();
+      setLogout();
+      if ((window as any).queryClient) {
+        (window as any).queryClient.clear();
+      }
     }
 
     return Promise.reject(error);

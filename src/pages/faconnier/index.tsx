@@ -13,14 +13,14 @@ export default function Producer() {
   const [date, setDate] = useState<"asc" | "desc">("asc");
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden gap-4">
+    <div className="h-screen w-full flex flex-col gap-4">
       {/* <ProductsHeader /> */}
       <FaconnierHeader />
 
-      <div className="flex-1 overflow-hidden rounded-xl bg-foreground shadow-sm border flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div className="flex-1 rounded-xl bg-foreground shadow-sm border flex flex-col">
+        <div className="flex-1">
           {/* This is the scrollable content area */}
-          <div className="min-h-full p-4">
+          <div className="min-h-full p-4 mb-10">
             <FaconnierContent
               openBon={openBon}
               setOpenBon={setOpenBon}

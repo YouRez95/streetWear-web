@@ -1,19 +1,21 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDeleteClientReturnStock } from "@/hooks/useReturnStock";
-import { formatDateToDDMMYYYY } from "@/lib/utils";
+import { formatDateToDDMMYYYY, cn } from "@/lib/utils";
 import type { GetReturnStockResponse } from "@/types/models";
 import { useState } from "react";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { Trash2, X } from "lucide-react";
 
 type DeleteStockReturnDialogProps = {
   open: boolean;
@@ -29,18 +31,18 @@ export function DeleteStockReturnDialog({
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const deleteStockReturnMutation = useDeleteClientReturnStock();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   function handleChangeCode(e: React.ChangeEvent<HTMLInputElement>) {
     setCode(e.target.value);
-    setError("");
+    if (error) setError("");
   }
 
-  async function handleDeleteProduct() {
+  function handleDeleteReturn() {
     if (!code) {
       setError("Le code est requis");
       return;
     }
-
     if (code.toUpperCase() !== "SUPPRIMER") {
       setError("Le code est incorrect");
       return;
@@ -56,22 +58,62 @@ export function DeleteStockReturnDialog({
           );
           return;
         }
-        setCode("");
-        setOpen(false);
+        resetForm();
       },
     });
   }
 
+  const resetForm = () => {
+    setCode("");
+    setError("");
+    setOpen(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[700px] bg-foreground">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Supprimer un retour</DialogTitle>
-          <DialogDescription className="text-background text-base space-y-2">
+    <Dialog open={open} onOpenChange={resetForm}>
+      <DialogContent
+        className={cn(
+          "bg-foreground flex flex-col",
+          isMobile
+            ? "h-full max-w-full overflow-y-auto [&>button]:hidden"
+            : "min-w-[600px] max-w-[700px]"
+        )}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        {/* Close Button on Mobile */}
+        {isMobile && (
+          <div>
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        )}
+
+        <DialogHeader className="flex flex-col gap-3 pb-4 pt-5 md:pt-0">
+          <DialogTitle className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Trash2 className="w-10 h-10 bg-destructive p-2 rounded-lg text-foreground" />
+              <p
+                className={cn(
+                  "font-bagel text-destructive",
+                  isMobile ? "text-xl" : "text-2xl"
+                )}
+              >
+                Supprimer un retour
+              </p>
+            </div>
+          </DialogTitle>
+          <DialogDescription className="text-background/80 text-left">
             Êtes-vous sûr de vouloir supprimer ce retour effectué par{" "}
             <strong>{stockReturn.client.name}</strong> le{" "}
-            <strong>{formatDateToDDMMYYYY(new Date(stockReturn.date))}</strong>{" "}
-            ?<br />
+            <strong>{formatDateToDDMMYYYY(new Date(stockReturn.date))}</strong>
+            ?
+            <br />
             <br />
             <strong>Détails :</strong>
             <br />- Bon N° : {stockReturn.bonNumber}
@@ -79,47 +121,62 @@ export function DeleteStockReturnDialog({
             <br />
             <br />
             <strong>Conséquence :</strong> Cette action est irréversible. La
-            quantité retournée sera supprimée de l’historique et réaffectée
-            comme disponible chez le client.
+            quantité sera supprimée de l'historique et réaffectée au client.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="code" className="text-right text-base">
-              Code
-            </Label>
-            <Input
-              id="code"
-              value={code}
-              onChange={handleChangeCode}
-              className="col-span-3 border placeholder:text-background/25 placeholder:text-sm "
-              placeholder="Tapez 'supprimer' pour confirmer"
-            />
-            {error && (
-              <p className="text-destructive text-sm col-span-4 text-right">
-                {error}
-              </p>
-            )}
+
+        {/* Form Content */}
+        <div className="flex-1 px-2 md:px-0">
+          <div className="space-y-6 mb-5 md:mb-0">
+            <div className="space-y-3">
+              <Label
+                htmlFor="code"
+                className="text-base font-medium text-background block"
+              >
+                Pour confirmer, tapez "Supprimer" dans le champ ci-dessous
+              </Label>
+              <Input
+                id="code"
+                name="code"
+                value={code}
+                onChange={handleChangeCode}
+                className="border-background/30 placeholder:text-background/30 hover:border-background/50 focus:border-destructive/50 bg-foreground text-background p-3 rounded-lg transition-colors"
+                placeholder="Tapez Supprimer"
+              />
+            </div>
           </div>
         </div>
-        <DialogFooter>
-          <DialogClose asChild>
+
+        {/* Sticky Footer */}
+        <DialogFooter className="flex flex-col gap-3 pt-4">
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg border border-destructive/20 w-full">
+              {error}
+            </div>
+          )}
+          <div className="flex gap-3">
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "flex-1 border text-base",
+                  isMobile
+                    ? "border-background/50 text-background"
+                    : "border-background/30"
+                )}
+              >
+                Annuler
+              </Button>
+            </DialogClose>
             <Button
-              type="button"
-              variant="ghost"
-              className="border-[2px] text-base"
+              variant="destructive"
+              className="flex-1 text-base"
+              onClick={handleDeleteReturn}
+              disabled={deleteStockReturnMutation.isPending}
             >
-              Annuler
+              Supprimer
             </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            variant={"destructive"}
-            className="text-base"
-            onClick={handleDeleteProduct}
-          >
-            Supprimer
-          </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

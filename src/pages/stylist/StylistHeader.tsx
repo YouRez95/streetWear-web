@@ -81,7 +81,7 @@ export default function StylistHeader() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 w-full">
       {stats.map((stat) => {
         // const isMoney =
         //   stat.key === 'totalValueSent' ||
@@ -99,21 +99,23 @@ export default function StylistHeader() {
         return (
           <div
             key={stat.key}
-            className="flex items-center gap-4 bg-foreground rounded-xl p-5 shadow-sm border min-h-24"
+            className="flex items-center gap-2 md:gap-4 bg-foreground rounded-xl p-5 shadow-sm border min-h-24"
           >
-            <div className="p-3 bg-secondary rounded-full">
+            <div className="p-3 scale-75 md:scale-100 bg-secondary rounded-full">
               {iconMap[stat.key]}
             </div>
             <div className="flex flex-col gap-0">
-              <p className="text-base text-primary/90">{stat.label}</p>
+              <p className="text-sm md:text-base text-primary/90">
+                {stat.label}
+              </p>
               <div className="flex items-center gap-4">
-                <p className="text-2xl font-semibold font-bagel">
+                <p className="text-base md:text-2xl font-semibold font-bagel truncate">
                   {stat.value} {suffix}
                 </p>
                 {stat.percentage !== undefined && (
                   <div
                     className={cn(
-                      "flex items-center gap-1 p-1 px-3 mt-2 rounded-full text-sm font-medium",
+                      "sm:flex items-center gap-1 p-1 px-3 mt-2 rounded-full text-sm font-medium hidden",
                       stat.percentage > 99.99
                         ? "bg-secondary/10 text-secondary"
                         : "bg-destructive/10 text-destructive"

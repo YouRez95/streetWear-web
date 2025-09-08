@@ -14,13 +14,13 @@ export default function TabSeasons() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="flex justify-between items-start px-7 pt-7">
+      <header className="flex flex-col md:flex-row gap-10 md:gap-0 justify-between items-start px-7 pt-7">
         <div className="flex flex-col gap-5">
           <h1 className="text-xl font-medium">Saisons</h1>
           <p className="">Gérer vos saisons</p>
         </div>
-        <div className="flex items-center gap-2 ">
-          <div className="min-w-[300px] relative">
+        <div className="flex md:items-center flex-col md:flex-row gap-2 w-full md:w-auto">
+          <div className="w-full md:min-w-[300px] relative">
             <div className="absolute left-2 top-[50%] translate-y-[-50%]">
               <Search className="text-background/50" />
             </div>

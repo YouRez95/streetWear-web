@@ -83,7 +83,6 @@ export default function ClientsContentHeader({
     }
   }, [activeClients, selectedClientId]);
 
-  // Only update if selectedBonId is not in the current bons
   useEffect(() => {
     if (
       bons.length > 0 &&
@@ -93,7 +92,7 @@ export default function ClientsContentHeader({
     } else if (bons.length === 0 && selectedClientBonId !== "") {
       setSelectedClientBonId("");
     }
-  }, [selectedClientId, bons]);
+  }, [selectedClientBonId, bons]);
 
   const handleOpenAvanceDialog = () => {
     if (!selectedClientId || !selectedClientBonId) {
@@ -107,17 +106,18 @@ export default function ClientsContentHeader({
   };
 
   return (
-    <div className="flex justify-between items-center mb-10 w-full">
-      <div className="flex gap-4 items-center">
+    <div className="flex flex-col lg:flex-row lg:flex-wrap lg:justify-between lg:items-center gap-4 md:gap-6 mb-10 w-full">
+      {/* Left Section (Selectors) */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
         {/* Client Dropdown */}
         <Select
           value={selectedClientId}
           onValueChange={(val) => setSelectedClientId(val)}
         >
-          <SelectTrigger className="w-[200px] border-background/50 border rounded-md p-3 data-[placeholder]:text-background">
+          <SelectTrigger className="w-full sm:w-[200px] border rounded-md p-3">
             <SelectValue placeholder="Select Client" />
           </SelectTrigger>
-          <SelectContent className="">
+          <SelectContent>
             {activeClients?.clients?.map((client) => (
               <SelectItem key={client.id} value={client.id}>
                 {client.name}
@@ -131,8 +131,8 @@ export default function ClientsContentHeader({
           value={selectedClientBonId || ""}
           onValueChange={(val) => setSelectedClientBonId(val)}
         >
-          <SelectTrigger className="w-[200px] border-background/50 border rounded-md p-3 data-[placeholder]:text-background">
-            <SelectValue placeholder="Select Bon" className="" />
+          <SelectTrigger className="w-full sm:w-[200px] border rounded-md p-3">
+            <SelectValue placeholder="Select Bon" />
           </SelectTrigger>
           <SelectContent>
             {bons.map((bon) => (
@@ -142,99 +142,146 @@ export default function ClientsContentHeader({
             ))}
           </SelectContent>
         </Select>
+
         {/* Bon Status */}
         {selectedBon && (
-          <div className="text-sm font-semibold bg-yellow-300 p-2 rounded-md">
+          <div className="text-xs sm:text-sm font-semibold bg-yellow-300 px-3 py-2 rounded-md text-center sm:text-left">
             {selectedBon?.bonStatus === "OPEN" && "Bon ouvert"}
             {selectedBon?.bonStatus === "CLOSED" && "Bon fermé"}
           </div>
         )}
-
-        {/* Download Bon */}
-        {selectedBon && (
-          <Button
-            variant="ghost"
-            className="font-semibold flex items-center gap-2 border border-background/50 rounded-md"
-            onClick={() => downloadExcelBon(selectedClientBonId, "client")}
-          >
-            <Download className="w-4 h-4 mb-1" />
-          </Button>
-        )}
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Delete Bon */}
-        {selectedClient && selectedBon && (
-          <Button
-            variant="destructive"
-            className="bg-destructive text-foreground font-semibold flex items-center gap-2"
-            onClick={() => setOpenDeleteBonDialog(true)}
-          >
-            <Trash className="w-4 h-4 mb-1" />
-            Supprimer le bon
-          </Button>
-        )}
-        {/* Close Bon and Open Bon */}
-        {selectedBon?.bonStatus === "OPEN" && (
-          <Button
-            onClick={() => setOpenCloseBonDialog(true)}
-            disabled={!selectedBon}
-            aria-label="Close selected bon"
-            className="bg-secondary text-foreground hover:bg-secondary/90 font-semibold flex items-center gap-2"
-          >
-            <Lock className="w-4 h-4 mb-1" />
-            Fermer le bon
-          </Button>
-        )}
-        {selectedBon?.bonStatus === "CLOSED" && (
-          <Button
-            onClick={() => setOpenOpenBonDialog(true)}
-            disabled={!selectedBon}
-            aria-label="Open selected bon"
-            className="bg-secondary text-foreground hover:bg-secondary/90 font-semibold flex items-center gap-2"
-          >
-            <Unlock className="w-4 h-4 mb-1" />
-            Ouvrir le bon
-          </Button>
-        )}
-        {/* Add Avance */}
-        {selectedClient && selectedBon && (
-          <Button
-            onClick={handleOpenAvanceDialog}
-            className="bg-primary text-foreground hover:bg-primary/90 font-semibold flex items-center gap-2"
-          >
-            <HandCoins className="w-4 h-4 mb-1" />
-            Add Avance
-          </Button>
-        )}
+      {/* Right Section (Actions, Search, Filters) */}
+      <div className="flex gap-3 flex-col sm:flex-row items-end justify-between">
+        <div className="flex gap-3 flex-1 flex-wrap">
+          {/* Delete Bon */}
+          {selectedClient && selectedBon && (
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={() => setOpenDeleteBonDialog(true)}
+            >
+              <Trash className="w-4 h-4" />
+              <span className="hidden lg:inline">Supprimer</span>
+            </Button>
+          )}
 
-        <div className="min-w-[300px] relative">
-          <div className="absolute left-2 top-[50%] translate-y-[-50%]">
-            <SearchIcon className="text-background/50" />
+          {/* Close/Open Bon */}
+          {selectedBon?.bonStatus === "OPEN" && (
+            <Button
+              onClick={() => setOpenCloseBonDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              <span className="hidden lg:inline">Fermer</span>
+            </Button>
+          )}
+          {selectedBon?.bonStatus === "CLOSED" && (
+            <Button
+              onClick={() => setOpenOpenBonDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Unlock className="w-4 h-4" />
+              <span className="hidden lg:inline">Ouvrir</span>
+            </Button>
+          )}
+
+          {/* Add Avance */}
+          {selectedClient && selectedBon && (
+            <Button
+              onClick={handleOpenAvanceDialog}
+              className="flex items-center gap-2"
+            >
+              <HandCoins className="w-4 h-4" />
+              <span className="hidden lg:inline">Avance</span>
+            </Button>
+          )}
+
+          {/* Download Bon */}
+          {selectedBon && (
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 border"
+              onClick={() => downloadExcelBon(selectedClientBonId, "client")}
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Search & Filter */}
+        <div className="flex gap-4 flex-1 justify-end w-full sm:w-auto lg:hidden">
+          <div className="relative w-full sm:w-[250px]">
+            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 text-background/50 w-4 h-4" />
+            <Input
+              className="w-full pl-8 rounded-lg text-background/70 placeholder:text-background/30"
+              placeholder="Rechercher..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
+          <Popover>
+            <PopoverTrigger>
+              <FunnelPlus className="w-8 h-8 cursor-pointer text-background/70 border rounded-md p-2 hover:bg-background/10 transition" />
+            </PopoverTrigger>
+            <PopoverContent className="w-[180px] p-4">
+              <div className="text-base font-semibold mb-2">Filtres</div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="open" className="text-sm">
+                    Actifs
+                  </Label>
+                  <Switch
+                    id="open"
+                    checked={openBon}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !closedBon) return;
+                      setOpenBon(checked);
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="closed" className="text-sm">
+                    Fermés
+                  </Label>
+                  <Switch
+                    id="closed"
+                    checked={closedBon}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !openBon) return;
+                      setClosedBon(checked);
+                    }}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      <div className="lg:flex gap-4 flex-1 justify-end w-full sm:w-auto hidden">
+        <div className="relative w-full sm:w-[250px]">
+          <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 text-background/50 w-4 h-4" />
           <Input
-            className="w-full placeholder:text-background/35 text-background rounded-lg pl-9"
-            placeholder="Rechercher un produit"
+            className="w-full pl-8 rounded-lg text-background/70 placeholder:text-background/30"
+            placeholder="Rechercher..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        {/* Filter Bons */}
         <Popover>
           <PopoverTrigger>
-            <FunnelPlus className="w-8 h-8 cursor-pointer text-background/70 border border-background/50 rounded-md p-2 hover:bg-background/10 transition" />
+            <FunnelPlus className="w-8 h-8 cursor-pointer text-background/70 border rounded-md p-2 hover:bg-background/10 transition" />
           </PopoverTrigger>
-
-          <PopoverContent className="w-[150px] p-4 mr-5">
-            <div className="text-base font-semibold mb-2">Filter Bons</div>
-            <div className="border-b border-background/20 mb-3" />
+          <PopoverContent className="w-[180px] p-4">
+            <div className="text-base font-semibold mb-2">Filtres</div>
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <Label htmlFor="open" className="text-sm font-medium">
-                  Open
+                <Label htmlFor="open" className="text-sm">
+                  Actifs
                 </Label>
                 <Switch
-                  className=""
                   id="open"
                   checked={openBon}
                   onCheckedChange={(checked) => {
@@ -244,8 +291,8 @@ export default function ClientsContentHeader({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="closed" className="text-sm font-medium">
-                  Closed
+                <Label htmlFor="closed" className="text-sm">
+                  Fermés
                 </Label>
                 <Switch
                   id="closed"
@@ -270,7 +317,6 @@ export default function ClientsContentHeader({
         type="client"
       />
 
-      {/* Only show CloseBonDialog if bon is OPEN */}
       {selectedBon?.bonStatus === "OPEN" && (
         <CloseBonDialog
           open={openCloseBonDialog}
@@ -281,7 +327,6 @@ export default function ClientsContentHeader({
         />
       )}
 
-      {/* Only show OpenBonDialog if bon is CLOSED */}
       {selectedBon?.bonStatus === "CLOSED" && (
         <OpenBonDialog
           open={openOpenBonDialog}

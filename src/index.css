@@ -179,3 +179,24 @@ body {
     @apply bg-background text-foreground;
   }
 } */
+
+/* Add to your global CSS */
+/* @supports (height: 100dvh) {
+  .drawer-content {
+    max-height: min(90dvh, 90vh) !important;
+  }
+} */
+
+/* Prevent zoom on input focus (iOS Safari) */
+/* input, textarea, select {
+  font-size: 16px !important;
+} */
+
+/* Improve mobile input handling */
+/* @media screen and (max-width: 768px) {
+  input:focus,
+  textarea:focus {
+    position: fixed;
+    z-index: 999;
+  }
+} */

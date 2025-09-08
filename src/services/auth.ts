@@ -1,9 +1,9 @@
 import apiClient from "@/lib/apiClient";
-import type { LoginUser } from "@/types/types";
+import type { LoginUser, LogoutUser } from "@/types/types";
 
 export const authService: {
   loginUser: LoginUser;
-  logoutUser: () => void;
+  logoutUser: LogoutUser;
 } = {
   loginUser: async (userCredentials) => {
     try {

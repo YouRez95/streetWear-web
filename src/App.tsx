@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import {
   AppLayout,
   Content,
-  ContentHeader,
+  // ContentHeader,
   Sidebar,
 } from "./layouts/AppLayout";
 import { Navbar } from "./components/navbar";
@@ -14,7 +14,7 @@ function App() {
         <Navbar />
       </Sidebar>
       <Content className="flex items-center justify-center flex-col m-2 mb-4 gap-2">
-        <ContentHeader className="" />
+        {/* <ContentHeader className="" /> */}
         <Outlet />
       </Content>
       <Toaster />

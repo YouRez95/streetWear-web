@@ -13,13 +13,13 @@ export default function Clients() {
   const [date, setDate] = useState<"asc" | "desc">("asc");
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden gap-4">
+    <div className="h-screen w-full flex flex-col gap-4">
       <ClientsHeader />
 
-      <div className="flex-1 overflow-hidden rounded-xl bg-foreground shadow-sm border flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div className="flex-1 rounded-xl bg-foreground shadow-sm border flex flex-col">
+        <div className="flex-1">
           {/* This is the scrollable content area */}
-          <div className="min-h-full p-4">
+          <div className="h-full p-4 mb-10">
             <ClientsContent
               openBon={openBon}
               setOpenBon={setOpenBon}
@@ -37,6 +37,7 @@ export default function Clients() {
         </div>
 
         {/* Sticky pagination bar at the bottom */}
+        {/* <div className="h-16 bg-muted-foreground sticky bottom-0 shrink-0 mt-auto flex justify-center items-center"> */}
         <div className="h-16 bg-muted-foreground sticky bottom-0 shrink-0 mt-auto flex justify-center items-center">
           <PaginationComponent
             page={page}

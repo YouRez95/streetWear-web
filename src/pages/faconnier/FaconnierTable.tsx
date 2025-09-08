@@ -21,7 +21,7 @@ import { formatDateToDDMMYYYY, getImageUrl } from "@/lib/utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ArrowUpDown, Download, Info, Pencil, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DeleteAvanceDialog } from "./DeleteAvanceDialog";
+import { DeleteAvanceFaconnierDialog } from "./DeleteAvanceDialog";
 import { DeleteOrderFaconnierDialog } from "./DeleteOrderFaconnierDialog";
 import { EditOrderFaconnierDialog } from "./EditOrderFaconnierDialog";
 import type { GetActiveFaconniersResponse } from "@/types/models";
@@ -165,7 +165,7 @@ export default function FaconnierTable({
               order.type === "PRODUCT" ? (
                 <TableRow key={order.id}>
                   <TableCell>{order.reference}</TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
                       <img
                         src={getImageUrl(order.productImage, "product")}
@@ -176,7 +176,9 @@ export default function FaconnierTable({
                           target.src = defaultProductImage;
                         }}
                       />
-                      <span className="text-lg">{order.productName}</span>
+                      <span className="text-lg truncate">
+                        {order.productName}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{formatDateToDDMMYYYY(order.createdAt)}</TableCell>
@@ -339,7 +341,7 @@ export default function FaconnierTable({
         onClose={setOpenDeleteOrderDialog}
       />
 
-      <DeleteAvanceDialog
+      <DeleteAvanceFaconnierDialog
         faconnierId={selectedFaconnierId}
         bonId={selectedBonId}
         openDeleteAvanceDialog={openDeleteAvanceDialog}

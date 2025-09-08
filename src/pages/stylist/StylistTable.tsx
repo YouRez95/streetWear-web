@@ -1,11 +1,6 @@
 import defaultProductImage from "@/assets/placeholder-image/default-product.webp";
 import { Button } from "@/components/ui/button";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
   Table,
   TableBody,
   TableCaption,
@@ -25,6 +20,11 @@ import { DeleteAvanceStylistDialog } from "./DeleteAvanceStylistDialog";
 import { DeleteOrderStylistDialog } from "./DeleteOrderStylistDialog";
 import { EditOrderStylistDialog } from "./EditOrderStylistDialog";
 import type { GetActiveStylistsResponse } from "@/types/models";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const paymentMethodMap: Record<string, string> = {
   cash: "Espèces",
@@ -154,7 +154,7 @@ export default function StylistTable({
               order.type === "PRODUCT" ? (
                 <TableRow key={order.id}>
                   <TableCell>{order.reference}</TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
                       <img
                         src={getImageUrl(order.productImage, "product")}
@@ -165,7 +165,9 @@ export default function StylistTable({
                           target.src = defaultProductImage;
                         }}
                       />
-                      <span className="text-lg">{order.productName}</span>
+                      <span className="text-lg truncate">
+                        {order.productName}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{formatDateToDDMMYYYY(order.createdAt)}</TableCell>
@@ -261,14 +263,16 @@ export default function StylistTable({
                       </Button>
                     )}
                     {order.description && (
-                      <HoverCard>
-                        <HoverCardTrigger className="p-2 border border-secondary/80 text-secondary cursor-pointer hover:text-secondary hover:bg-secondary/10 rounded-md">
-                          <Info className="w-4 h-4" />
-                        </HoverCardTrigger>
-                        <HoverCardContent className="text-left mr-4 text-sm font-normal">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="p-2 border border-secondary/80 text-secondary cursor-pointer hover:text-secondary hover:bg-secondary/10 rounded-md">
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="text-left mr-4 text-sm font-normal">
                           {order.description}
-                        </HoverCardContent>
-                      </HoverCard>
+                        </PopoverContent>
+                      </Popover>
                     )}
                     <Button
                       variant="ghost"

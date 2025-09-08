@@ -12,7 +12,7 @@ export default function ReturnStockSearch({
 }: ProductSearchProps) {
   return (
     <div className="flex justify-end items-center gap-2 mb-5">
-      <div className="min-w-[300px] relative">
+      <div className="w-full md:min-w-[300px] md:w-auto relative">
         <div className="absolute left-2 top-[50%] translate-y-[-50%]">
           <SearchIcon className="text-background/50" />
         </div>

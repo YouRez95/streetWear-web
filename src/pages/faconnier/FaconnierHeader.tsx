@@ -1,4 +1,5 @@
 import { useFaconnierSummary } from "@/hooks/useFaconnier";
+import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
 import {
   CreditCard,
@@ -33,89 +34,97 @@ type Stat = {
   value: string | number;
 };
 
-// type FaconnierHeaderProps = {
-//   selectedFaconnierId: string
-//   selectedBonId: string
-// }
-
 export default function FaconnierHeader() {
   const { selectedFaconnierId, selectedBonId } = useUserStore();
   const { data: dataSummary } = useFaconnierSummary(
     selectedFaconnierId,
     selectedBonId
   );
+
+  const totalSent = dataSummary?.summary?.totalQuantitySent || 0;
+  const totalReturned = dataSummary?.summary?.totalQuantityReturned || 0;
+  const totalRestants = totalSent - totalReturned;
+
+  const totalValue = dataSummary?.summary?.totalValueSent || 0;
+  const totalAdvances = dataSummary?.summary?.totalAdvances || 0;
+  const remainingValue = totalValue - totalAdvances;
+  const percentPaid = (totalAdvances / totalValue) * 100 || 0;
+
   const stats: Stat[] = [
     {
       key: "totalQuantitySent",
       label: "Articles envoyés",
-      value: dataSummary?.summary?.totalQuantitySent || 0,
+      value: totalSent,
     },
     {
       key: "totalQuantityReturned",
       label: "Articles retournés",
-      value: dataSummary?.summary?.totalQuantityReturned || 0,
+      value: totalReturned,
     },
     {
       key: "totalQuantityRestants",
-      label: "Articles restantes",
-      value:
-        (dataSummary?.summary?.totalQuantitySent || 0) -
-        (dataSummary?.summary?.totalQuantityReturned || 0),
+      label: "Articles restants",
+      value: totalRestants,
     },
     {
       key: "totalValueSent",
       label: "Montant total à payer",
-      value: dataSummary?.summary?.totalValueSent || 0,
+      value: totalValue,
     },
     {
       key: "totalAdvances",
       label: "Total des avances",
-      value: dataSummary?.summary?.totalAdvances || 0,
+      value: totalAdvances,
     },
     {
       key: "totalAvancesRestantes",
       label: "Total des avances restantes",
-      value:
-        (dataSummary?.summary?.totalValueSent || 0) -
-        (dataSummary?.summary?.totalAdvances || 0),
+      value: remainingValue,
     },
   ];
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 w-full">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 w-full">
       {stats.map((stat) => {
+        const suffix =
+          stat.key === "totalQuantitySent" ||
+          stat.key === "totalQuantityReturned" ||
+          stat.key === "totalQuantityRestants"
+            ? "pcs"
+            : "Dhs";
+
+        const showPercentage =
+          stat.key === "totalAdvances" || stat.key === "totalAvancesRestantes";
+
         return (
           <div
             key={stat.key}
-            className="flex items-center gap-4 bg-foreground rounded-xl p-5 shadow-sm border min-h-24"
+            className="flex items-center gap-2 md:gap-4 bg-foreground rounded-xl p-5 shadow-sm border min-h-24"
           >
-            <div className="p-3 bg-secondary rounded-full">
+            <div className="p-3 scale-75 md:scale-100 bg-secondary rounded-full">
               {iconMap[stat.key]}
             </div>
             <div className="flex flex-col gap-0">
-              <p className="text-base text-primary/90">{stat.label}</p>
+              <p className="text-sm md:text-base text-primary/90">
+                {stat.label}
+              </p>
               <div className="flex items-center gap-4">
-                <p className="text-2xl font-semibold font-bagel">
-                  {stat.value}{" "}
-                  {stat.key === "totalQuantitySent" ||
-                  stat.key === "totalQuantityReturned" ||
-                  stat.key === "totalQuantityRestants"
-                    ? "pcs"
-                    : "dhs"}
+                <p className="text-base md:text-2xl font-semibold font-bagel truncate">
+                  {stat.value} {suffix}
                 </p>
-                {/* {stat.key !== 'totalQuantitySent' && stat.key !== 'totalValueSent' && (
+
+                {showPercentage && (
                   <div
                     className={cn(
-                      'flex items-center gap-1 p-1 px-3 mt-2 rounded-full text-sm font-medium'
+                      "sm:flex items-center gap-1 p-1 px-3 mt-2 rounded-full text-sm font-medium hidden",
+                      percentPaid > 99.99
+                        ? "bg-secondary/10 text-secondary"
+                        : "bg-destructive/10 text-destructive"
                     )}
                   >
-                    {stat.key === 'totalAdvances' && (
-                      <span className="bg-primary text-white font-bold px-2 rounded-xl">
-                        {stat.reste} dhs
-                      </span>
-                    )}
-                    {stat.key === 'totalQuantityReturned' && <span> {stat.reste} pcs</span>}
+                    <span>{percentPaid.toFixed(1)}%</span>
                   </div>
-                )} */}
+                )}
               </div>
             </div>
           </div>

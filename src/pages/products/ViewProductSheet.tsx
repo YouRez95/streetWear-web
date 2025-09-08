@@ -23,9 +23,9 @@ export default function ViewProductSheet({
 }: ViewProductSheetProps) {
   return (
     <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-      <SheetContent className="bg-foreground border min-w-[500px] overflow-y-auto p-6">
+      <SheetContent className="bg-foreground border w-[85vw] md:min-w-[500px] overflow-y-auto p-3 md:p-6">
         <SheetHeader>
-          <SheetTitle className="text-background text-2xl font-bold">
+          <SheetTitle className="text-background text-xl md:text-2xl font-bold">
             Détails du produit
           </SheetTitle>
           <SheetDescription className="text-background text-base">
@@ -36,7 +36,7 @@ export default function ViewProductSheet({
         <div className="flex flex-col gap-6 text-background text-base pb-6">
           {/* Image */}
           <Card className="bg-muted border-none shadow-none">
-            <CardContent className="p-4">
+            <CardContent className="md:p-4">
               <img
                 src={getImageUrl(product.productImage, "product")}
                 alt={product.name}
@@ -49,11 +49,11 @@ export default function ViewProductSheet({
           </Card>
 
           {/* Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations</CardTitle>
+          <Card className="py-2 md:py-6">
+            <CardHeader className="px-2 md:px-3">
+              <CardTitle className="">Informations</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 px-2 md:px-3">
               <InfoLine label="Nom" value={product.name} />
               <InfoLine
                 label="Type"
@@ -68,8 +68,8 @@ export default function ViewProductSheet({
 
           {/* Styliste History */}
           {product.StyleTraitOrderItems.length > 0 && (
-            <Card>
-              <CardHeader>
+            <Card className="py-2 md:py-6">
+              <CardHeader className="px-2 md:px-3">
                 <CardTitle>Historique du styliste</CardTitle>
               </CardHeader>
               <CardContent className="overflow-x-auto p-0">
@@ -128,11 +128,11 @@ export default function ViewProductSheet({
 
           {/* Product Status */}
           {product.ProductStatus && (
-            <Card>
-              <CardHeader>
+            <Card className="py-2 md:py-6">
+              <CardHeader className="px-2 md:px-3">
                 <CardTitle>Statut du produit</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 px-2 md:px-3">
                 <StatusLine
                   label="Quantité en stock"
                   value={product.ProductStatus.raw_in_stock}

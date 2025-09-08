@@ -14,9 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProduct } from "@/hooks/useProduct";
 import { getImageUrl, validateProductForm } from "@/lib/utils";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CreateProductInput, Product } from "@/types/models";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 type UpdateProductDialogProps = {
   product: Product;
@@ -42,6 +43,7 @@ export default function UpdateProductDialog({
   open,
   setOpen,
 }: UpdateProductDialogProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
   const [image, setImage] = useState<File | null>(null);
@@ -62,9 +64,7 @@ export default function UpdateProductDialog({
         createdAt: product.createdAt || new Date().toISOString(),
       });
 
-      if (product.productImage) {
-        setImageUrl(product.productImage);
-      }
+      if (product.productImage) setImageUrl(product.productImage);
       setImagePreview(null);
     }
   }, [product, open]);
@@ -93,22 +93,18 @@ export default function UpdateProductDialog({
       fileName: image?.name || null,
     };
 
-    if (updateProductMutation) {
-      updateProductMutation.mutate(
-        { productData: productPayload },
-        {
-          onSuccess: (data) => {
-            if (data.status === "failed") {
-              return;
-            }
-            setFormData(initialFormData);
-            setImage(null);
-            setImagePreview(null);
-            setOpen(false);
-          },
-        }
-      );
-    }
+    updateProductMutation.mutate(
+      { productData: productPayload },
+      {
+        onSuccess: (data) => {
+          if (data.status === "failed") return;
+          setFormData(initialFormData);
+          setImage(null);
+          setImagePreview(null);
+          setOpen(false);
+        },
+      }
+    );
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +116,51 @@ export default function UpdateProductDialog({
     }
   };
 
+  if (isMobile) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="[&>button]:hidden bg-foreground flex flex-col h-full max-w-full overflow-y-auto">
+          <div className="">
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+                onClick={() => setOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+          <DialogHeader className="flex flex-col gap-2">
+            <DialogTitle className="text-primary flex items-center gap-2">
+              <img
+                src={productLogo}
+                alt="logo-produit"
+                className="w-10 h-10 border bg-primary/10 p-2 rounded-lg"
+              />
+              <p className="text-2xl font-bagel">Mettre à jour le produit</p>
+            </DialogTitle>
+            <DialogDescription className="text-background/80 text-left">
+              Mettre à jour les informations et l'image du produit.
+            </DialogDescription>
+          </DialogHeader>
+          <FormContent
+            error={error}
+            formData={formData}
+            handleChange={handleChange}
+            handleImageChange={handleImageChange}
+            handleSubmit={handleSubmit}
+            imagePreview={imagePreview}
+            imageUrl={imageUrl}
+            isMobile={isMobile}
+            setFormData={setFormData}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Desktop
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-foreground min-w-[700px]">
@@ -127,8 +168,8 @@ export default function UpdateProductDialog({
           <DialogTitle className="flex items-center gap-2">
             <img
               src={productLogo}
-              alt="product-logo"
-              className="w-10 h-10 bg-background p-2 rounded-lg"
+              alt="logo-produit"
+              className="w-10 h-10 border bg-primary/10 p-2 rounded-lg"
             />
             <p className="text-2xl font-bagel">Mettre à jour le produit</p>
           </DialogTitle>
@@ -136,135 +177,179 @@ export default function UpdateProductDialog({
             Mettre à jour les informations et l'image du produit.
           </DialogDescription>
         </DialogHeader>
-
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-          {/* Product Reference */}
-          <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-            <Label htmlFor="reference" className="text-base font-semibold">
-              Référence du produit
-            </Label>
-            <Input
-              id="reference"
-              name="reference"
-              value={formData.reference}
-              onChange={handleChange}
-              placeholder="Entrer la référence du produit"
-              className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
-            />
-          </div>
-
-          {/* Product Information & Image */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-              <h1 className="text-base font-semibold">
-                Informations du produit
-              </h1>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name" className="text-base font-medium">
-                  Nom
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Entrer le nom du produit"
-                  className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="date" className="text-base font-medium">
-                  Date
-                </Label>
-                <DatePicker
-                  setFormData={setFormData}
-                  date={formData.createdAt}
-                  label="createdAt"
-                />
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <Label htmlFor="description" className="text-base">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Entrer la description du produit"
-                  className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50 flex-1"
-                  value={formData.description}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="flex-1 flex flex-col max-h-[300px]">
-              <Label
-                htmlFor="productImage"
-                className="text-base flex flex-col gap-4 h-full p-2 bg-muted-foreground rounded-lg overflow-hidden"
-              >
-                <span className="font-semibold">Image du produit</span>
-                <div className="flex items-center gap-2 cursor-pointer justify-center flex-1 rounded-lg overflow-hidden">
-                  {!imagePreview && <Upload className="w-5 h-5" />}
-                  {imagePreview && (
-                    <img
-                      src={imagePreview}
-                      alt="Product Preview"
-                      className="object-cover w-full h-full max-h-"
-                    />
-                  )}
-                  {imageUrl && (
-                    <img
-                      src={getImageUrl(imageUrl)}
-                      alt="Product Preview"
-                      className="object-cover w-full h-full max-h-"
-                    />
-                  )}
-                </div>
-              </Label>
-              <Input
-                id="productImage"
-                name="productImage"
-                type="file"
-                placeholder="Enter Product Image"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Product Stock & Type */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-              <Label htmlFor="totalQty" className="text-base font-semibold">
-                Stock
-              </Label>
-              <Input
-                id="totalQty"
-                name="totalQty"
-                placeholder="Entrer le stock du produit"
-                type="number"
-                className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
-                value={formData.totalQty}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="text-base text-destructive">
-            {error && <p className="text-destructive">{error}</p>}
-          </div>
-          {/* Actions */}
-          <div className="flex justify-end gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost" className="border border-background/50">
-                Annuler
-              </Button>
-            </DialogClose>
-            <Button type="submit" className="w-fit">
-              Mettre à jour le produit
-            </Button>
-          </div>
-        </form>
+        <FormContent
+          error={error}
+          formData={formData}
+          handleChange={handleChange}
+          handleImageChange={handleImageChange}
+          handleSubmit={handleSubmit}
+          imagePreview={imagePreview}
+          imageUrl={imageUrl}
+          isMobile={isMobile}
+          setFormData={setFormData}
+        />
       </DialogContent>
     </Dialog>
   );
 }
+
+const FormContent = ({
+  error,
+  formData,
+  handleChange,
+  handleImageChange,
+  handleSubmit,
+  imagePreview,
+  imageUrl,
+  setFormData,
+}: {
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
+  formData: CreateProductInput & { id: string };
+  setFormData: React.Dispatch<
+    React.SetStateAction<CreateProductInput & { id: string }>
+  >;
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  imagePreview: string | null;
+  imageUrl: string | null;
+  error: string | null;
+  isMobile: boolean;
+}) => {
+  return (
+    <div className="flex-1 justify-between flex flex-col pb-5 md:pb-0">
+      <form
+        id="updateProductForm"
+        className="flex flex-col gap-2 mb-5"
+        onSubmit={handleSubmit}
+      >
+        {/* Product Reference */}
+        <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+          <Label htmlFor="reference" className="text-base font-semibold">
+            Référence du produit
+          </Label>
+          <Input
+            id="reference"
+            name="reference"
+            value={formData.reference}
+            onChange={handleChange}
+            placeholder="Entrer la référence du produit"
+            className="border border-background/50 text-base placeholder:text-background/50"
+          />
+        </div>
+
+        {/* Product Information & Image */}
+        <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+            <h1 className="text-base font-semibold">Informations du produit</h1>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="name" className="text-base font-medium">
+                Nom
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="Entrer le nom du produit"
+                className="border border-background/50 text-base placeholder:text-background/50"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="text-base font-medium">Date</Label>
+              <DatePicker
+                className="w-full"
+                setFormData={setFormData}
+                date={formData.createdAt}
+                label="createdAt"
+              />
+            </div>
+            <div className="flex flex-col gap-2 flex-1">
+              <Label htmlFor="description" className="text-base">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Entrer la description du produit"
+                className="border border-background/50 text-base placeholder:text-background/50 flex-1"
+                value={formData.description}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col max-h-[300px]">
+            <Label
+              htmlFor="productImage"
+              className="text-base flex flex-col gap-4 h-full p-2 bg-muted-foreground rounded-lg overflow-hidden"
+            >
+              <span className="font-semibold">Image du produit</span>
+              <div className="flex items-center gap-2 cursor-pointer justify-center flex-1 rounded-lg overflow-hidden">
+                {!imagePreview && !imageUrl && <Upload className="w-5 h-5" />}
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Product Preview"
+                    className="object-cover w-full h-full"
+                  />
+                )}
+                {imageUrl && (
+                  <img
+                    src={getImageUrl(imageUrl)}
+                    alt="Product Preview"
+                    className="object-cover w-full h-full"
+                  />
+                )}
+              </div>
+            </Label>
+            <Input
+              id="productImage"
+              name="productImage"
+              type="file"
+              placeholder="Enter Product Image"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* Product Stock */}
+        <div className="flex gap-2">
+          <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+            <Label htmlFor="totalQty" className="text-base font-semibold">
+              Stock
+            </Label>
+            <Input
+              id="totalQty"
+              name="totalQty"
+              placeholder="Entrer le stock du produit"
+              type="number"
+              className="border border-background/50 text-base placeholder:text-background/50"
+              value={formData.totalQty}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+      </form>
+      <div className="">
+        <div className="text-base text-destructive">
+          {error && <p className="text-destructive">{error}</p>}
+        </div>
+        <div className="flex justify-end gap-2">
+          <DialogClose asChild>
+            <Button variant="ghost" className="border border-background/50">
+              Annuler
+            </Button>
+          </DialogClose>
+
+          <Button type="submit" className="w-fit" form="updateProductForm">
+            Mettre à jour le produit
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};

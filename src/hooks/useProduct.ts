@@ -123,14 +123,9 @@ export function useUpdateProduct() {
   const queryClient = useQueryClient();
 
   const { activeSeason } = useUserStore();
-  if (!activeSeason) {
-    showErrorToast("Choose one of your Seasons or create one.", "");
-    return;
-  }
-
   return useMutation({
     mutationFn: ({ productData }: { productData: UpdateProductInput }) =>
-      productService.updateProduct(productData, activeSeason.id),
+      productService.updateProduct(productData, activeSeason?.id || ""),
     onSuccess: (data) => {
       if (data.status === "failed") {
         showErrorToast("Error updating product", data);

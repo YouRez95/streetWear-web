@@ -120,7 +120,8 @@ export function useUpdateClientReturnStock() {
     },
     onError: (error) => showErrorToast("Error updating return stock", error),
     onSettled: (data) => {
-      //console.log('onSettled data update', data)
+      console.log("onSettled data update", data);
+      if (data?.status === "failed" || !data?.data) return;
       queryClient.invalidateQueries({
         queryKey: queryKeys.returnStockRoot(seasonId),
         exact: false,

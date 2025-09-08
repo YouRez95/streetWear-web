@@ -94,6 +94,11 @@ export type LoginUser = (userCreadentials: LoginFormType) => Promise<{
   user?: UserData;
 }>;
 
+export type LogoutUser = () => Promise<{
+  status: "success" | "failed";
+  message: string;
+}>;
+
 // ======================= SEASONS TYPES ======================= //
 export type GetSeasons = (
   page: number,

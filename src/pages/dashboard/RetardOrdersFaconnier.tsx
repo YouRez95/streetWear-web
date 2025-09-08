@@ -59,7 +59,7 @@ export default function RetardOrdersFaconnier() {
               <TableCell className="font-medium">
                 {faconnier.reference}
               </TableCell>
-              <TableCell className="font-medium">
+              <TableCell className="font-medium min-w-[200px]">
                 <div className="flex items-center gap-3">
                   <img
                     src={getImageUrl(faconnier.productImage, "product")}
@@ -70,7 +70,9 @@ export default function RetardOrdersFaconnier() {
                       target.src = defaultProductImage;
                     }}
                   />
-                  <span className="text-lg">{faconnier.productName}</span>
+                  <span className="text-lg text-wrap">
+                    {faconnier.productName}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>{faconnier.faconnierName}</TableCell>

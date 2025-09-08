@@ -16,9 +16,6 @@ import TabStylists from "./stylistSettings/TabStylists";
 import TabUsers from "./userSettings/TabUsers";
 
 export default function Settings() {
-  // WIP: Filter tabs based on user role
-
-  // const { userData } = useUserStore()
   const queryClient = useQueryClient();
 
   const TabsListItems = [
@@ -53,19 +50,19 @@ export default function Settings() {
   }, [queryClient]);
 
   return (
-    <section className="w-full h-[90vh] flex flex-col gap-10">
+    <section className="h-screen w-full flex flex-col gap-4">
       <SettingsHeader />
 
-      <div className="text-background flex-1 overflow-hidden">
+      <div className="text-background flex-1">
         <Tabs
           defaultValue={TabsListItems[0]?.id}
           className="space-y-8 flex flex-col h-full"
         >
-          <TabsList className="bg-transparent gap-7 text-background rounded-none py-0 w-fit justify-start border-b border-b-background/20">
+          <TabsList className="bg-transparent max-w-[700px] gap-7 text-background flex justify-start rounded-none py-0 w-full border-b border-b-background/20 overflow-x-auto flex-nowrap scrollbar-thin scrollbar-thumb-secondary/50 scrollbar-track-background/20">
             {TabsListItems.map((item) => (
               <TabsTrigger
                 key={item.id}
-                className="data-[state=active]:bg-transparent cursor-pointer text-background/50 data-[state=active]:border-b-[3px] data-[state=active]:border-b-background rounded-none data-[state=active]:font-bold text-lg data-[state=active]:text-background data-[state=active]:shadow-none "
+                className="flex-shrink-0 data-[state=active]:bg-transparent cursor-pointer text-background/50 data-[state=active]:border-b-[3px] data-[state=active]:border-b-background rounded-none data-[state=active]:font-bold text-lg data-[state=active]:text-background data-[state=active]:shadow-none"
                 value={item.id}
               >
                 {item.name}
@@ -77,7 +74,7 @@ export default function Settings() {
             <TabsContent
               key={item.id}
               value={item.id}
-              className="bg-foreground text-background rounded-xl border flex-1 space-y-10 overflow-y-auto"
+              className="bg-foreground text-background rounded-xl border flex-1 space-y-10"
             >
               {item.content}
             </TabsContent>

@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useStylistSummary, useToggleBonStylist } from "@/hooks/useStylist";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { Lock, X } from "lucide-react";
 
 type CloseBonStylistDialogProps = {
   open: boolean;
@@ -22,16 +24,17 @@ type CloseBonStylistDialogProps = {
   setSelectedBonId: (bonId: string) => void;
 };
 
-export const CloseBonStylistDialog = ({
+export function CloseBonStylistDialog({
   open,
   setOpen,
   selectedBonId,
   selectedStylistId,
   setSelectedBonId,
-}: CloseBonStylistDialogProps) => {
+}: CloseBonStylistDialogProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
-  const { mutate: toggleBonStylist } = useToggleBonStylist();
+  const { mutate: toggleBonStylist, isPending } = useToggleBonStylist();
   const { data: dataSummary } = useStylistSummary(
     selectedStylistId,
     selectedBonId
@@ -44,14 +47,15 @@ export const CloseBonStylistDialog = ({
       dataSummary.summary.totalValueSent - dataSummary.summary.totalAdvances > 0
     ) {
       return (
-        <p className="text-destructive">
-          Ce bon n'est pas complet. Êtes-vous sûr de vouloir le fermer ?
+        <p className="text-destructive text-left">
+          Ce bon n&apos;est pas complet. Êtes-vous sûr de vouloir le fermer ?
         </p>
       );
     }
-
     return (
-      <p className="text-success">Le bon est complet. Vous pouvez le fermer.</p>
+      <p className="text-green-500 text-left">
+        Le bon est complet. Vous pouvez le fermer.
+      </p>
     );
   }
 
@@ -60,85 +64,126 @@ export const CloseBonStylistDialog = ({
     setError("");
   }
 
+  function closeDialog() {
+    setOpen(false);
+    setCode("");
+    setError("");
+  }
+
   function handleCloseBon() {
     if (!code) {
       setError("Le code est requis");
       return;
     }
-
     if (code.toUpperCase() !== "FERMER") {
       setError("Le code est incorrect");
       return;
     }
     setError("");
-    //console.log('close bon', selectedStylistId, selectedBonId)
+
     toggleBonStylist(
       { bonId: selectedBonId, openBon: false, closeBon: true },
       {
         onSuccess: (data) => {
-          if (data.status === "failed") {
-            return;
-          }
+          if (data.status === "failed") return;
           setSelectedBonId("");
-          setCode("");
-          setError("");
-          setOpen(false);
+          closeDialog();
         },
       }
     );
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={() => {
-        setCode("");
-        setError("");
-        setOpen(false);
-      }}
-    >
-      <DialogContent className="bg-foreground rounded-xl p-5 shadow-sm border space-y-3">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Fermer le bon</DialogTitle>
-          <DialogDescription className="text-background text-base">
-            Pour fermer le bon, veuillez entrer le code "Fermer".
+    <Dialog open={open} onOpenChange={closeDialog}>
+      <DialogContent
+        className={cn(
+          "bg-foreground flex flex-col",
+          isMobile
+            ? "h-full max-w-full overflow-y-auto [&>button]:hidden"
+            : "sm:max-w-[525px]"
+        )}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        {/* Mobile Close Button */}
+        {isMobile && (
+          <div>
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        )}
+
+        <DialogHeader className="flex flex-col gap-3 pb-4 pt-5 md:pt-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Lock className="w-10 h-10 bg-background p-2 rounded-lg text-foreground" />{" "}
+            <p className="text-2xl font-bagel">Fermer le bon</p>{" "}
+          </DialogTitle>
+          <DialogDescription className="text-background/80 text-base text-left">
+            Pour fermer le bon, veuillez entrer le code <b>"Fermer"</b>.
           </DialogDescription>
           {showMessage()}
         </DialogHeader>
 
-        <div className="flex items-center gap-4 ">
-          <Label htmlFor="code" className="text-left text-base">
-            Code
-          </Label>
-          <Input
-            id="code"
-            value={code}
-            onChange={handleChangeCode}
-            className="col-span-3 border-background/50"
-          />
+        {/* Form Content */}
+        <div className="flex-1 px-2 md:px-0">
+          <div className="grid gap-4 py-4">
+            <div className="space-y-3">
+              <Label
+                htmlFor="code"
+                className="text-base font-medium text-background block"
+              >
+                Pour confirmer, tapez "Fermer" dans le champ ci-dessous
+              </Label>
+              <Input
+                id="code"
+                value={code}
+                onChange={handleChangeCode}
+                className="border-background/30 placeholder:text-background/30 hover:border-background/50 focus:border-destructive/50 bg-foreground text-background p-3 rounded-lg transition-colors"
+                placeholder="Tapez Fermer"
+                disabled={isPending}
+              />
+            </div>
+          </div>
         </div>
 
-        <DialogFooter
-          className={cn(
-            "flex items-center",
-            error
-              ? "justify-between sm:justify-between"
-              : "justify-end sm:justify-end"
+        {/* Sticky Footer */}
+        <DialogFooter className="flex flex-col gap-3 pt-4">
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg border border-destructive/20 w-full">
+              {error}
+            </div>
           )}
-        >
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="flex items-center gap-2">
+          <div className="flex gap-3">
             <DialogClose asChild>
-              <Button variant="ghost" className="border border-background/50">
+              <Button
+                type="button"
+                variant="ghost"
+                className={cn(
+                  "flex-1 border text-base",
+                  isMobile
+                    ? "border-background/50 text-background"
+                    : "border-background/30"
+                )}
+              >
                 Annuler
               </Button>
             </DialogClose>
-            <Button variant={"destructive"} onClick={handleCloseBon}>
-              Fermer le bon
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1 text-base"
+              onClick={handleCloseBon}
+            >
+              Fermer
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}

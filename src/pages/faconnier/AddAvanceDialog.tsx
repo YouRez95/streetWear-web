@@ -2,12 +2,11 @@ import DatePicker from "@/components/datePicker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +14,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateAvanceClient } from "@/hooks/useClients";
 import { useCreateAvanceFaconnier } from "@/hooks/useFaconnier";
 import { useCreateAvanceStylist } from "@/hooks/useStylist";
-import { cn } from "@/lib/utils";
-import { ChevronDown, HandCoins } from "lucide-react";
+import { HandCoins, ChevronDown, X } from "lucide-react";
 import { useState } from "react";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { cn } from "@/lib/utils";
+
+type AvanceDataType = {
+  amount: number;
+  method: string;
+  description: string;
+  createdAt: string;
+};
 
 type AddAvanceDialogProps = {
   open: boolean;
@@ -32,7 +39,6 @@ type AddAvanceDialogProps = {
 };
 
 const options = ["cash", "bank", "cheque"];
-
 const paymentMethodMap: Record<string, string> = {
   cash: "Espèces",
   cheque: "Chèque",
@@ -47,10 +53,11 @@ export default function AddAvanceDialog({
   useCreateAvanceHook,
   type,
 }: AddAvanceDialogProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [error, setError] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { mutate: createAvance } = useCreateAvanceHook();
-  const [avanceData, setAvanceData] = useState({
+  const [avanceData, setAvanceData] = useState<AvanceDataType>({
     amount: 0,
     method: "cash",
     description: "",
@@ -64,21 +71,18 @@ export default function AddAvanceDialog({
     setError(null);
   };
 
-  const handleSubmitAvance = () => {
-    // Validation
+  const handleSubmit = () => {
     if (avanceData.amount <= 0 || !avanceData.amount) {
-      setError("Le montant de l'avance est requis ");
+      setError("Le montant de l'avance est requis");
       return;
     }
 
-    if (avanceData.method === "" || !avanceData.method) {
+    if (!avanceData.method) {
       setError("La méthode de paiement est requise");
       return;
     }
 
-    // Submit avance
     setError(null);
-    //console.log('submit avance', avanceData)
 
     createAvance(
       {
@@ -93,20 +97,24 @@ export default function AddAvanceDialog({
       },
       {
         onSuccess: (data) => {
-          if (data.status === "failed") {
-            return;
-          }
+          if (data.status === "failed") return;
+          resetForm();
           setOpen(false);
-          setAvanceData({
-            amount: 0,
-            method: "",
-            description: "",
-            createdAt: new Date().toISOString(),
-          });
         },
-        onError: () => setError("Failed to add avance. Please try again."),
+        onError: () => setError("Échec de l'ajout de l'avance. Réessayez."),
       }
     );
+  };
+
+  const resetForm = () => {
+    setAvanceData({
+      amount: 0,
+      method: "cash",
+      description: "",
+      createdAt: new Date().toISOString(),
+    });
+    setError(null);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -114,42 +122,94 @@ export default function AddAvanceDialog({
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) {
-          setAvanceData({
-            amount: 0,
-            method: "cash",
-            description: "",
-            createdAt: new Date().toISOString(),
-          });
-          setError(null);
-        }
+        if (!isOpen) resetForm();
       }}
     >
-      <DialogContent className="bg-foreground min-w-[700px] space-y-6">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent
+        className={cn(
+          "bg-foreground flex flex-col",
+          isMobile
+            ? "h-full max-w-full overflow-y-auto [&>button]:hidden"
+            : "min-w-[700px]"
+        )}
+      >
+        {/* Close Button on Mobile */}
+        {isMobile && (
+          <div>
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+                onClick={() => setOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        )}
+
+        {/* Header */}
+        <DialogHeader className="flex flex-col gap-2">
+          <DialogTitle className="flex items-center gap-2 text-primary">
             <HandCoins className="w-10 h-10 bg-background p-2 rounded-lg text-foreground" />
             <p className="text-2xl font-bagel">Ajouter une avance</p>
           </DialogTitle>
-          <DialogDescription className="text-background/80">
-            Ajouter une avance au bon sélectionné.
+          <DialogDescription className="text-background/80 text-left">
+            Cette avance sera ajoutée au bon sélectionné.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="avance-date" className="w-[110px]">
-            Date
-          </Label>
-          <DatePicker
-            setFormData={setAvanceData}
-            date={avanceData.createdAt}
-            label="createdAt"
-          />
-        </div>
+        {/* Form */}
+        <AvanceForm
+          avanceData={avanceData}
+          setAvanceData={setAvanceData}
+          error={error}
+          setError={setError}
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-        <div className="flex gap-4">
-          <div className="flex items-center gap-2 flex-1">
-            <Label htmlFor="avance-amount" className="w-[200px]">
+function AvanceForm({
+  avanceData,
+  setAvanceData,
+  error,
+  setError,
+  isDropdownOpen,
+  setIsDropdownOpen,
+  handleChange,
+  handleSubmit,
+}: {
+  avanceData: AvanceDataType;
+  setAvanceData: React.Dispatch<React.SetStateAction<any>>;
+  error: string | null;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  isDropdownOpen: boolean;
+  setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  handleSubmit: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col justify-between gap-5 pb-5 md:pb-0">
+      <form
+        id="addAvanceForm"
+        className="flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
+        {/* Amount & Method */}
+        <div className="flex gap-4 flex-col md:flex-row">
+          <div className="flex flex-col flex-1 gap-2 bg-muted-foreground p-2 rounded-lg">
+            <Label htmlFor="avance-amount" className="text-base font-semibold">
               Montant
             </Label>
             <Input
@@ -159,19 +219,18 @@ export default function AddAvanceDialog({
               placeholder="Montant de l'avance"
               value={avanceData.amount || ""}
               onChange={handleChange}
-              className="border-background/50 border text-background placeholder:text-background/50"
+              className="border border-background/50 text-base placeholder:text-background/50"
             />
           </div>
 
-          <div className="relative flex items-center gap-2 flex-1">
-            <Label htmlFor="avance-method" className="w-[100px]">
+          <div className="flex flex-col flex-1 gap-2 bg-muted-foreground p-2 rounded-lg relative">
+            <Label htmlFor="avance-method" className="text-base font-semibold">
               Méthode
             </Label>
             <button
               type="button"
-              name="method"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full border border-background/50 text-[14px] flex justify-between items-center p-2 rounded-md placeholder:text-background/50"
+              className="w-full border border-background/50 text-base flex justify-between items-center p-2 rounded-md"
             >
               {paymentMethodMap[avanceData.method] ||
                 "Sélectionner une méthode"}
@@ -182,13 +241,13 @@ export default function AddAvanceDialog({
               />
             </button>
             {isDropdownOpen && (
-              <div className="absolute top-full right-0 w-[calc(100%-80px)] bg-foreground border border-background/50 rounded-md mt-1 z-50">
+              <div className="absolute top-full left-0 w-full bg-foreground border border-background/50 rounded-md mt-1 z-50">
                 {options.map((option) => (
                   <div
                     key={option}
                     className="p-2 hover:bg-background/10 cursor-pointer"
                     onClick={() => {
-                      setAvanceData({ ...avanceData, method: option as any });
+                      setAvanceData({ ...avanceData, method: option });
                       setIsDropdownOpen(false);
                       setError(null);
                     }}
@@ -201,8 +260,25 @@ export default function AddAvanceDialog({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="avance-description" className="w-[140px]">
+        {/* Date */}
+        <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+          <Label htmlFor="avance-date" className="text-base font-semibold">
+            Date
+          </Label>
+          <DatePicker
+            setFormData={setAvanceData}
+            date={avanceData.createdAt}
+            label="createdAt"
+            className="w-full"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+          <Label
+            htmlFor="avance-description"
+            className="text-base font-semibold"
+          >
             Description
           </Label>
           <Textarea
@@ -211,29 +287,29 @@ export default function AddAvanceDialog({
             placeholder="Description"
             value={avanceData.description || ""}
             onChange={handleChange}
-            className="border-background/50 border placeholder:text-background/50 resize-none"
+            className="border border-background/50 text-base placeholder:text-background/50 resize-none"
           />
         </div>
+      </form>
 
-        <DialogFooter
-          className={cn(
-            "flex items-center",
-            error
-              ? "justify-between sm:justify-between"
-              : "justify-end sm:justify-end"
-          )}
-        >
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="flex items-center gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost" className="border border-background/50">
-                Annuler
-              </Button>
-            </DialogClose>
-            <Button onClick={handleSubmitAvance}>Ajouter l'avance</Button>
+      {/* Footer */}
+      <div className="flex flex-col gap-2">
+        {error && (
+          <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg border border-destructive/20">
+            {error}
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        )}
+        <div className="flex justify-end gap-2">
+          <DialogClose asChild>
+            <Button variant="ghost" className="border border-background/50">
+              Annuler
+            </Button>
+          </DialogClose>
+          <Button type="submit" form="addAvanceForm">
+            Ajouter l&apos;avance
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

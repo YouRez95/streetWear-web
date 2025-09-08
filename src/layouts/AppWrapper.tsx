@@ -20,9 +20,10 @@ export const AppWrapper = () => {
       } else {
         setLogout();
       }
+      setLoading(false);
     };
+
     checkLoginStatus();
-    setLoading(false);
   }, []);
 
   if (loading) {
@@ -33,5 +34,5 @@ export const AppWrapper = () => {
     );
   }
 
-  return isLoggedIn ? <Outlet /> : <Login />;
+  return isLoggedIn && !loading ? <Outlet /> : <Login />;
 };

@@ -168,7 +168,7 @@ export default function ProductsTable({
                 <TableCell className="font-medium">
                   {product.reference}
                 </TableCell>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                   <div className="flex items-center gap-3">
                     <img
                       src={getImageUrl(product.productImage, "product")}
@@ -179,7 +179,7 @@ export default function ProductsTable({
                         target.src = defaultProductImage;
                       }}
                     />
-                    <span className="text-lg">{product.name}</span>
+                    <span className="text-base truncate">{product.name}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-background/80">

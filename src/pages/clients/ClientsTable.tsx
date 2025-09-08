@@ -108,7 +108,7 @@ export default function ClientsTable({
             <TableHead className="text-background w-[200px] font-semibold">
               Modèle
             </TableHead>
-            <TableHead className="text-background w-[150px] font-semibold">
+            <TableHead className="text-background w-[150px] font-semibold flex items-center justify-start">
               Date
               <Button
                 variant="ghost"
@@ -159,7 +159,7 @@ export default function ClientsTable({
               order.type === "PRODUCT" ? (
                 <TableRow key={order.id}>
                   <TableCell>{order.reference}</TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
                       <img
                         src={getImageUrl(order.productImage, "product")}
@@ -170,12 +170,18 @@ export default function ClientsTable({
                           target.src = defaultProductImage;
                         }}
                       />
-                      <span className="text-lg">{order.productName}</span>
+                      <span className="text-lg truncate">
+                        {order.productName}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{formatDateToDDMMYYYY(order.createdAt)}</TableCell>
-                  <TableCell>{order.quantity}</TableCell>
-                  <TableCell>{order.returned}</TableCell>
+                  <TableCell className="text-center">
+                    {order.quantity}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {order.returned}
+                  </TableCell>
                   <TableCell>{order.unit_price?.toFixed(2)}</TableCell>
                   <TableCell>
                     {(

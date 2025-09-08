@@ -20,8 +20,8 @@ export default function ProductSearch({
     setOpenTransferMultipleProductsToClient,
   ] = useState(false);
   return (
-    <div className="flex justify-end items-center gap-2 mb-5">
-      <div className="min-w-[300px] relative">
+    <div className="flex flex-col md:flex-row justify-between items-center gap-2 mb-5">
+      <div className="w-full md:w-fit md:min-w-[300px] relative">
         <div className="absolute left-2 top-[50%] translate-y-[-50%]">
           <SearchIcon className="text-background/50" />
         </div>
@@ -33,19 +33,25 @@ export default function ProductSearch({
         />
       </div>
 
-      <Button onClick={() => setOpenCreateProductDialog(true)}>
-        <PlusIcon />
-        Créer un produit
-      </Button>
+      <div className="flex items-center gap-2 w-full md:w-fit">
+        <Button
+          onClick={() => setOpenCreateProductDialog(true)}
+          className="flex-1"
+        >
+          <PlusIcon />
+          Créer un produit
+        </Button>
 
-      <Button
-        variant={"secondary"}
-        className="text-foreground"
-        onClick={() => setOpenTransferMultipleProductsToClient(true)}
-      >
-        <Shirt />
-        Transferer plusieurs produits
-      </Button>
+        <Button
+          variant="secondary"
+          className="text-foreground flex-1 truncate"
+          onClick={() => setOpenTransferMultipleProductsToClient(true)}
+        >
+          <Shirt className="shrink-0" />
+
+          <span className="ml-2 truncate">Transférer plusieurs produits</span>
+        </Button>
+      </div>
 
       <CreateProductDialog
         open={openCreateProductDialog}

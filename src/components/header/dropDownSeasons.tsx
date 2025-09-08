@@ -43,21 +43,21 @@ export default function DropDownSeasons() {
         className="flex items-center justify-between"
       >
         <Button
-          className="text-white font-bagel rounded-lg flex w-[200px] items-center justify-between text-base py-5 px-4"
+          className="text-white font-bagel rounded-lg flex w-fit lg:w-[150px] items-center justify-between text-sm lg:py-5 lg:px-4"
           variant="secondary"
         >
           {activeSeason?.name.toUpperCase().slice(0, 15)}
           <ChevronDown className="h-4 w-4 text-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="text-center w-[200px]">
+      <DropdownMenuContent className="text-center w-[100px] lg:w-[150px]">
         <DropdownMenuLabel className="text-base">Seasons</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {seasons.map((season) => (
           <DropdownMenuItem
             key={season.id}
             className={cn(
-              "flex items-center justify-center cursor-pointer text-background text-base hover:bg-none focus:bg-transparent focus:text-inherit",
+              "flex items-center justify-start truncate cursor-pointer text-background text-sm hover:bg-none focus:bg-transparent focus:text-inherit",
               activeSeason?.id === season.id
                 ? "bg-secondary focus:bg-secondary text-foreground focus:text-foreground"
                 : "focus:bg-secondary/20"

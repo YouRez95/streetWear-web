@@ -15,8 +15,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateProduct } from "@/hooks/useProduct";
 import { validateProductForm } from "@/lib/utils";
 import type { CreateProductInput } from "@/types/models";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useState } from "react";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 type CreateProductDialogProps = {
   open: boolean;
@@ -37,6 +38,7 @@ export default function CreateProductDialog({
   open,
   setOpen,
 }: CreateProductDialogProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
   const [image, setImage] = useState<File | null>(null);
@@ -68,7 +70,6 @@ export default function CreateProductDialog({
     };
 
     // Call the create product mutation
-
     createProductMutation.mutate(
       { productData: productPayload },
       {
@@ -93,6 +94,50 @@ export default function CreateProductDialog({
     }
   };
 
+  if (isMobile) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="[&>button]:hidden bg-foreground flex flex-col h-full max-w-full overflow-y-auto">
+          <div className="">
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4 border border-background/50 rounded-full w-9 h-9 flex items-center justify-center bg-primary/10"
+                onClick={() => setOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogClose>
+          </div>
+          <DialogHeader className="flex flex-col gap-2">
+            <DialogTitle className="text-primary flex items-center gap-2">
+              <img
+                src={productLogo}
+                alt="logo-produit"
+                className="w-10 h-10 border bg-primary/10 p-2 rounded-lg"
+              />
+              <p className="text-2xl font-bagel">Créer un produit</p>
+            </DialogTitle>
+            <DialogDescription className="text-background/80 text-left">
+              Ce produit sera ajouté à votre saison active.
+            </DialogDescription>
+          </DialogHeader>
+
+          <ProductForm
+            formData={formData}
+            setFormData={setFormData}
+            error={error}
+            imagePreview={imagePreview}
+            handleSubmit={handleSubmit}
+            handleChange={handleChange}
+            handleImageChange={handleImageChange}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // 💻 Dialog on desktop
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-foreground min-w-[700px]">
@@ -101,7 +146,7 @@ export default function CreateProductDialog({
             <img
               src={productLogo}
               alt="logo-produit"
-              className="w-10 h-10 bg-background p-2 rounded-lg"
+              className="w-10 h-10 border bg-primary/10 p-2 rounded-lg"
             />
             <p className="text-2xl font-bagel">Créer un produit</p>
           </DialogTitle>
@@ -109,30 +154,69 @@ export default function CreateProductDialog({
             Ce produit sera ajouté à votre saison active.
           </DialogDescription>
         </DialogHeader>
+        <ProductForm
+          formData={formData}
+          setFormData={setFormData}
+          error={error}
+          imagePreview={imagePreview}
+          handleSubmit={handleSubmit}
+          handleChange={handleChange}
+          handleImageChange={handleImageChange}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-          {/* Référence du produit */}
-          <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-            <Label htmlFor="reference" className="text-base font-semibold">
-              Référence du produit
-            </Label>
-            <Input
-              id="reference"
-              name="reference"
-              value={formData.reference}
-              onChange={handleChange}
-              placeholder="Entrez la référence du produit"
-              className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
-            />
-          </div>
+function ProductForm({
+  formData,
+  setFormData,
+  error,
+  imagePreview,
+  handleSubmit,
+  handleChange,
+  handleImageChange,
+}: {
+  formData: CreateProductInput;
+  setFormData: React.Dispatch<React.SetStateAction<CreateProductInput>>;
+  error: string | null;
+  imagePreview: string | null;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="flex-1 justify-between flex flex-col pb-5 md:pb-0">
+      <form
+        id="createProductForm"
+        className="flex flex-col gap-2 mb-5"
+        onSubmit={handleSubmit}
+      >
+        {/* Référence du produit */}
+        <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+          <Label htmlFor="reference" className="text-base font-semibold">
+            Référence du produit
+          </Label>
+          <Input
+            id="reference"
+            name="reference"
+            value={formData.reference}
+            onChange={handleChange}
+            placeholder="Entrez la référence du produit"
+            className="border border-background/50 text-base placeholder:text-background/50"
+          />
+        </div>
 
-          {/* Informations & Image */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-              <h1 className="text-base font-semibold">
-                Informations du produit
-              </h1>
-              <div className="flex flex-col gap-2">
+        {/* Informations & Image */}
+        <div className="flex gap-2 flex-col md:flex-row">
+          <div className="md:flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+            <h1 className="text-base font-semibold">Informations du produit</h1>
+            <div className="flex gap-2 flex-col md:flex-row">
+              <div className="flex flex-col gap-2 flex-1">
                 <Label htmlFor="name" className="text-base font-medium">
                   Nom
                 </Label>
@@ -140,7 +224,7 @@ export default function CreateProductDialog({
                   id="name"
                   name="name"
                   placeholder="Entrez le nom du produit"
-                  className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
+                  className="border border-background/50 text-base placeholder:text-background/50"
                   value={formData.name}
                   onChange={handleChange}
                 />
@@ -150,89 +234,90 @@ export default function CreateProductDialog({
                   Date
                 </Label>
                 <DatePicker
+                  className="w-full"
                   setFormData={setFormData}
                   date={formData.createdAt}
                   label="createdAt"
                 />
               </div>
-
-              <div className="flex flex-col gap-2 flex-1">
-                <Label htmlFor="description" className="text-base">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Entrez la description du produit"
-                  className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50 flex-1"
-                  value={formData.description}
-                  onChange={handleChange}
-                />
-              </div>
             </div>
-            <div className="flex-1 flex flex-col max-h-[350px]">
-              <Label
-                htmlFor="productImage"
-                className="text-base flex flex-col gap-4 h-full p-2 bg-muted-foreground rounded-lg overflow-hidden"
-              >
-                <span className="font-semibold">Image du produit</span>
-                <div className="flex items-center gap-2 cursor-pointer justify-center flex-1 rounded-lg overflow-hidden">
-                  {!imagePreview && <Upload className="w-5 h-5" />}
-                  {imagePreview && (
-                    <img
-                      src={imagePreview}
-                      alt="Aperçu du produit"
-                      className="object-cover w-full h-full max-h-"
-                    />
-                  )}
-                </div>
-              </Label>
-              <Input
-                id="productImage"
-                name="productImage"
-                type="file"
-                placeholder="Choisir une image"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </div>
-          </div>
 
-          {/* Stock & Type */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-              <Label htmlFor="totalQty" className="text-base font-semibold">
-                Stock
+            <div className="flex flex-col gap-2 flex-1">
+              <Label htmlFor="description" className="text-base">
+                Description
               </Label>
-              <Input
-                id="totalQty"
-                name="totalQty"
-                placeholder="Entrez le stock du produit"
-                type="number"
-                className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
-                value={formData.totalQty}
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Entrez la description du produit"
+                className="border border-background/50 text-base placeholder:text-background/50 flex-1"
+                value={formData.description}
                 onChange={handleChange}
               />
             </div>
           </div>
-
-          <div className="text-base text-destructive">
-            {error && <p className="text-destructive">{error}</p>}
+          <div className="md:flex-1 flex flex-col h-[200px] md:h-auto md:max-h-[350px]">
+            <Label
+              htmlFor="productImage"
+              className="text-base flex flex-col gap-4 h-full p-2 bg-muted-foreground rounded-lg overflow-hidden"
+            >
+              <span className="font-semibold">Image du produit</span>
+              <div className="flex items-center gap-2 cursor-pointer justify-center flex-1 rounded-lg overflow-hidden">
+                {!imagePreview && <Upload className="w-5 h-5" />}
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Aperçu du produit"
+                    className="object-cover w-full h-full max-h-"
+                  />
+                )}
+              </div>
+            </Label>
+            <Input
+              id="productImage"
+              name="productImage"
+              type="file"
+              placeholder="Choisir une image"
+              onChange={handleImageChange}
+              className="hidden"
+            />
           </div>
+        </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost" className="border border-background/50">
-                Annuler
-              </Button>
-            </DialogClose>
-            <Button type="submit" className="w-fit">
-              Créer le produit
+        {/* Stock & Type */}
+        <div className="flex gap-2">
+          <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
+            <Label htmlFor="totalQty" className="text-base font-semibold">
+              Stock
+            </Label>
+            <Input
+              id="totalQty"
+              name="totalQty"
+              placeholder="Entrez le stock du produit"
+              type="number"
+              className="border border-background/50 text-base placeholder:text-background/50"
+              value={formData.totalQty}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+      </form>
+      <div className="">
+        <div className="text-base text-destructive">
+          {error && <p className="text-destructive">{error}</p>}
+        </div>
+        <div className="flex justify-end gap-2">
+          <DialogClose asChild>
+            <Button variant="ghost" className="border border-background/50">
+              Annuler
             </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </DialogClose>
+
+          <Button type="submit" className="w-fit" form="createProductForm">
+            Créer le produit
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

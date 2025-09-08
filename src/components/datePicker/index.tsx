@@ -9,12 +9,16 @@ type DatePickerProps = {
   setFormData: (data: any) => void;
   date?: string;
   label?: string;
+  className?: string;
+  calendarClassName?: string;
 };
 
 export default function DatePicker({
   setFormData,
   date,
   label = "date",
+  className,
+  calendarClassName,
 }: DatePickerProps) {
   const [selected, setSelected] = useState<Date | undefined>(
     date ? new Date(date) : new Date()
@@ -42,7 +46,8 @@ export default function DatePicker({
         type="button"
         variant={"ghost"}
         className={cn(
-          "w-[240px] pl-3 text-left font-normal border border-background/50"
+          "w-[240px] pl-3 text-left font-normal border border-background/50",
+          className
         )}
         onClick={() => setOpen((prev) => !prev)}
       >
@@ -51,7 +56,10 @@ export default function DatePicker({
       </Button>
       {open && (
         <Calendar
-          className="absolute top-full mt-1 left-0 bg-foreground border z-[100] shadow-md"
+          className={cn(
+            "absolute bottom-full md:top-full mt-1 left-0 bg-foreground border z-[100] shadow-md",
+            calendarClassName
+          )}
           classNames={{}}
           mode="single"
           selected={selected}

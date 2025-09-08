@@ -13,6 +13,7 @@ import { FunnelPlus, SearchIcon } from "lucide-react";
 import { Suspense, useState } from "react";
 import { CreateStylistDialog } from "./CreateStylistDialog";
 import { TableStylists } from "./TableStylists";
+import { cn } from "@/lib/utils";
 
 export default function TabStylists() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,13 +42,18 @@ export default function TabStylists() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="flex justify-between items-start px-7 pt-7">
+      <header className="flex flex-col md:flex-row gap-10 md:gap-0 justify-between items-start px-7 pt-7">
         <div className="flex flex-col gap-5">
           <h1 className="text-xl font-medium">Stylists</h1>
           <p className="">Gérez vos stylistes</p>
         </div>
-        <div className="flex items-center gap-2 ">
-          <div className="min-w-[300px] relative">
+        <div
+          className={cn(
+            "flex md:items-center flex-col md:flex-row gap-2 w-full md:w-auto",
+            userData?.role !== "super admin" && "flex-row"
+          )}
+        >
+          <div className="w-full md:min-w-[300px] relative">
             <div className="absolute left-2 top-[50%] translate-y-[-50%]">
               <SearchIcon className="text-background/50" />
             </div>
@@ -59,58 +65,62 @@ export default function TabStylists() {
           </div>
 
           {/* Dialog for creating Stylist */}
-          {userData?.role === "super admin" && (
-            <>
-              <Button
-                className="font-bagel text-base flex items-center justify-center pb-3 rounded-lg"
-                onClick={() => setOpenCreateStylistDialog(true)}
-              >
-                <span>+</span>
-                Ajouter un stylist
-              </Button>
-              <CreateStylistDialog
-                open={openCreateStylistDialog}
-                onOpenChange={setOpenCreateStylistDialog}
-              />
-            </>
-          )}
-          <Popover>
-            <PopoverTrigger>
-              <FunnelPlus className="w-8 h-8 cursor-pointer text-background/70 border border-background/50 rounded-md p-2 hover:bg-background/10 transition" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[150px] p-4 mr-5">
-              <div className="text-base font-semibold mb-2">Filter Stylist</div>
-              <div className="border-b border-background/20 mb-3" />
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <Switch
-                    id="طباعة"
-                    checked={typeStylist.includes("طباعة")}
-                    onCheckedChange={(checked) =>
-                      handleTypeChange("طباعة", checked)
-                    }
-                    disabled={false}
-                  />
-                  <Label htmlFor="طباعة" className="text-sm font-medium">
-                    طباعة
-                  </Label>
+          <div className="flex items-center gap-3">
+            {userData?.role === "super admin" && (
+              <>
+                <Button
+                  className="font-bagel text-base flex items-center justify-center pb-3 rounded-lg flex-1"
+                  onClick={() => setOpenCreateStylistDialog(true)}
+                >
+                  <span>+</span>
+                  Ajouter un stylist
+                </Button>
+                <CreateStylistDialog
+                  open={openCreateStylistDialog}
+                  onOpenChange={setOpenCreateStylistDialog}
+                />
+              </>
+            )}
+            <Popover>
+              <PopoverTrigger>
+                <FunnelPlus className="w-8 h-8 cursor-pointer text-background/70 border border-background/50 rounded-md p-2 hover:bg-background/10 transition" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[150px] p-4 mr-5">
+                <div className="text-base font-semibold mb-2">
+                  Filter Stylist
                 </div>
-                <div className="flex items-center justify-between">
-                  <Switch
-                    id="طرازة"
-                    checked={typeStylist.includes("طرازة")}
-                    onCheckedChange={(checked) =>
-                      handleTypeChange("طرازة", checked)
-                    }
-                    disabled={false}
-                  />
-                  <Label htmlFor="طرازة" className="text-sm font-medium">
-                    طرازة
-                  </Label>
+                <div className="border-b border-background/20 mb-3" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <Switch
+                      id="طباعة"
+                      checked={typeStylist.includes("طباعة")}
+                      onCheckedChange={(checked) =>
+                        handleTypeChange("طباعة", checked)
+                      }
+                      disabled={false}
+                    />
+                    <Label htmlFor="طباعة" className="text-sm font-medium">
+                      طباعة
+                    </Label>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Switch
+                      id="طرازة"
+                      checked={typeStylist.includes("طرازة")}
+                      onCheckedChange={(checked) =>
+                        handleTypeChange("طرازة", checked)
+                      }
+                      disabled={false}
+                    />
+                    <Label htmlFor="طرازة" className="text-sm font-medium">
+                      طرازة
+                    </Label>
+                  </div>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </header>
 
