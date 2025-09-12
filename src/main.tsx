@@ -13,6 +13,7 @@ import Stylists from "./pages/stylist";
 import Clients from "./pages/clients";
 import StockReturn from "./pages/stockReturn";
 import Settings from "./pages/settings";
+import { ErrorPage } from "./pages/error";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +67,7 @@ const router = createBrowserRouter([
         ],
       },
     ],
+    errorElement: <ErrorPage />,
   },
 ]);
 
