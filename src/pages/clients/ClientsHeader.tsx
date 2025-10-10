@@ -35,7 +35,7 @@ export default function ClientsHeader() {
 
   const totalValue = dataSummary?.summary?.totalValueSent || 0;
   const totalAdvances = dataSummary?.summary?.totalAdvances || 0;
-  const remaining = totalValue - totalAdvances;
+  const bonRemise = dataSummary?.summary?.remise || 0;
 
   const stats: Stat[] = [
     {
@@ -71,21 +71,13 @@ export default function ClientsHeader() {
     {
       key: "totalAvancesRestantes",
       label: "Montant restant",
-      value: remaining,
+      value: totalValue - totalAdvances - bonRemise,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 w-full">
       {stats.map((stat) => {
-        const suffix =
-          stat.key === "totalQuantitySent" ||
-          stat.key === "totalQuantityReturned"
-            ? "pcs"
-            : stat.key === "totalOrderItems"
-            ? "commandes"
-            : "Dhs";
-
         return (
           <div
             key={stat.key}
@@ -94,13 +86,20 @@ export default function ClientsHeader() {
             <div className="p-3 scale-75 md:scale-100 bg-secondary rounded-full">
               {iconMap[stat.key]}
             </div>
+
             <div className="flex flex-col gap-0">
               <p className="text-sm md:text-base text-primary/90">
                 {stat.label}
               </p>
               <div className="flex items-center gap-4">
                 <p className="text-base md:text-2xl font-semibold font-bagel truncate">
-                  {stat.value} {suffix}
+                  {stat.value}{" "}
+                  {stat.key === "totalQuantitySent" ||
+                  stat.key === "totalQuantityReturned"
+                    ? "pcs"
+                    : stat.key === "totalOrderItems"
+                    ? "Commandes"
+                    : "dhs"}
                 </p>
                 {stat.percentage !== undefined && (
                   <div
@@ -112,6 +111,11 @@ export default function ClientsHeader() {
                     )}
                   >
                     <span>{stat.percentage.toFixed(1)}%</span>
+                  </div>
+                )}
+                {stat.key === "totalAvancesRestantes" && bonRemise > 0 && (
+                  <div className="hidden sm:flex items-center gap-1 p-1 px-3 mt-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <span>Remise appliquée: {bonRemise} Dhs</span>
                   </div>
                 )}
               </div>

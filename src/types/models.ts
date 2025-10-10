@@ -693,6 +693,7 @@ export type GetClientSummaryResponse = {
     totalQuantityReturned: number;
     totalValueSent: number;
     totalAdvances: number;
+    remise: number;
   };
 };
 
@@ -788,6 +789,14 @@ export type DeleteOrderStylistResponse = {
     unit_price: number;
     styleTraitOrderId: string;
   };
+};
+
+export type ToggleBonClientInput = {
+  bonId: string;
+  seasonId: string;
+  openBon: boolean;
+  closeBon: boolean;
+  remise?: number;
 };
 
 export type DeleteOrderClientResponse = {
@@ -900,4 +909,275 @@ export type GetRetardOrdersFaconnierResponse = {
     delayDays: number;
     productImage: string | null;
   }[];
+};
+
+// Worker models
+export type WorkPlace = {
+  id: string;
+  name: string;
+  address: string | null;
+  createdAt: string;
+};
+
+export type CreateWorkPlaceInput = {
+  id: string;
+  name: string;
+  address: string | null;
+};
+
+export type CreateWorkPlaceResponse = {
+  status: "success" | "failed";
+  message: string;
+  workplace?: {
+    id: string;
+    name: string;
+    address: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type WorkerData = {
+  id: string;
+  name: string;
+  phone: string | null;
+  workplaceId: string;
+  salaireHebdomadaire: number;
+  isActive: boolean;
+  createdAt: string;
+};
+
+export type GetWorkersResponse = {
+  id: string;
+  name: string;
+  phone: string | null;
+  salaireHebdomadaire: number;
+  createdAt: string;
+  isActive: boolean;
+  workplace: {
+    id: string;
+    name: string;
+  };
+};
+
+export type CreateWorkerInput = Omit<
+  WorkerData,
+  "id" | "isActive" | "createdAt"
+>;
+
+export type UpdateWorkerInput = Omit<WorkerData, "isActive" | "createdAt">;
+
+export type CreateWorkerResponse = {
+  status: "success" | "failed";
+  message: string;
+  worker?: WorkerData;
+};
+
+export type Week = {
+  id: string;
+  weekStart: string;
+  weekEnd: string;
+  weekNumber: number;
+  displayText: string;
+};
+
+export type CreateWeekResponse = {
+  status: "success" | "failed";
+  message: string;
+  week?: {
+    weekStart: Date;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    weekEnd: Date;
+  };
+};
+
+export type DeleteWeekResponse = {
+  status: "success" | "failed";
+  message: string;
+  week?: {
+    weekStart: Date;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    weekEnd: Date;
+  };
+  nextWeekId?: string | null;
+};
+
+export type WorkerRecord = {
+  id: string;
+  workerId: string;
+  weekId: string;
+  lundi: number;
+  lundiSupp: number;
+  mardi: number;
+  mardiSupp: number;
+  mercredi: number;
+  mercrediSupp: number;
+  jeudi: number;
+  jeudiSupp: number;
+  vendredi: number;
+  vendrediSupp: number;
+  samedi: number;
+  samediSupp: number;
+  description: string | null;
+  salaireHebdomadaire: number;
+  avance: number;
+  isPaid: boolean;
+  worker: {
+    id: string;
+    name: string;
+  };
+};
+
+export type GetWeeksRecordsInput = {
+  weekId: string;
+  workplaceId: string;
+};
+
+export type GetWeekRecordsResponse = {
+  status: "success" | "failed";
+  message: string;
+  records: WorkerRecord[];
+  nextWeekId: string | null;
+  prevWeekId: string | null;
+};
+
+export type UpdateWeekRecordInput = {
+  id: string;
+  lundi: number;
+  mardi: number;
+  mercredi: number;
+  jeudi: number;
+  vendredi: number;
+  samedi: number;
+  avance: number;
+};
+
+export type UpdateWeekRecordPaymentInput = {
+  type: "pay" | "undo";
+  recordId: string;
+};
+
+export type UpdateWeekRecordResponse = {
+  status: "success" | "failed";
+  message: string;
+  record?: WorkerRecord;
+};
+
+export type GetYearSummaryInput = {
+  year: string;
+  workplaceId: string;
+};
+
+export type GetYearSummaryResponse = {
+  status: "success" | "failed";
+  message: string;
+  records?: {
+    name: string;
+    weeks: any[];
+    totalAmount: number;
+  }[];
+  yearTotal?: number;
+  nextYear?: number | null;
+  prevYear?: number | null;
+  year?: number;
+};
+
+export type GetSummaryWorkersResponse = {
+  status: "success" | "failed";
+  message: string;
+  summary: {
+    inactiveWorkers: number;
+    totalOvertimeHours: number;
+    totalRegularHours: number;
+    totalSpent: number;
+    totalWeeks: number;
+    totalWorkers: number;
+  };
+};
+
+export type GetSummaryWorkerResponse = {
+  status: "success" | "failed";
+  message: string;
+  summary: {
+    totalOvertimeHours: number;
+    totalRegularHours: number;
+    totalSpent: number;
+    totalWeeks: number;
+    totalAdvances: number;
+    workerName: string;
+  };
+};
+
+export type SecondWorkerRecord = {
+  id: string;
+  workerId: string;
+  weekId: string;
+  workplaceId: string;
+  worker: {
+    name: string;
+  };
+  lundi: number;
+  lundiSupp: number;
+  mardi: number;
+  mardiSupp: number;
+  mercredi: number;
+  mercrediSupp: number;
+  jeudi: number;
+  jeudiSupp: number;
+  vendredi: number;
+  vendrediSupp: number;
+  samedi: number;
+  samediSupp: number;
+  salaireHebdomadaire: number;
+  avance: number;
+  description: string | null;
+  week: Week;
+  workplace: Workplace;
+  weekNumber: number;
+  displayText: string;
+  isPaid: boolean;
+};
+
+export type Workplace = {
+  id: string;
+  name: string;
+  address: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PaginationMeta = {
+  currentPage: number;
+  totalPages: number;
+  totalRecords: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  nextPage: number | null;
+  prevPage: number | null;
+};
+
+export type GetWorkerRecordsResponse = {
+  status: "success" | "error";
+  message: string;
+  records: SecondWorkerRecord[];
+  pagination: PaginationMeta;
+};
+
+export type OrderStatus = "IN_PROGRESS" | "COMPLETED" | "CANCELED";
+export type CancelOrderFaconnierResponse = {
+  status: "success" | "failed";
+  message: string;
+  order?: {
+    id: string;
+    productId: string;
+    quantity_sent: number;
+    quantity_returned: number;
+    unit_price: number;
+    faconnierOrderId: string;
+    order_status: OrderStatus;
+  };
 };

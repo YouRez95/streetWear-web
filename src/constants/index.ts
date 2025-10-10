@@ -4,6 +4,8 @@ import producers from "../assets/icons/producer-icon-1.svg";
 import products from "../assets/icons/products-icon.svg";
 import retour from "../assets/icons/return-icon.svg";
 import stylists from "../assets/icons/stylists-icon.svg";
+import workers from "../assets/icons/workers-icon.svg";
+
 export const navbarItems = [
   {
     id: 1,
@@ -40,5 +42,11 @@ export const navbarItems = [
     text: "Retours",
     link: "/stock-return",
     icon: retour,
+  },
+  {
+    id: 7,
+    text: "Employés",
+    link: "/workers",
+    icon: workers,
   },
 ];

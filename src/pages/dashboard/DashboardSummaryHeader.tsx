@@ -69,6 +69,8 @@ export default function DashboardSummaryHeader() {
 
   const { client, faconnier, stylist } = data.summary;
 
+  console.log("Summary data:", data.summary);
+
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
       <CardGroup

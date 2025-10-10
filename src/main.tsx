@@ -14,6 +14,7 @@ import Clients from "./pages/clients";
 import StockReturn from "./pages/stockReturn";
 import Settings from "./pages/settings";
 import { ErrorPage } from "./pages/error";
+import Workers from "./pages/workers";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
           {
             path: "/stock-return",
             element: <StockReturn />,
+          },
+          {
+            path: "/workers",
+            element: <Workers />,
           },
         ],
       },

@@ -14,12 +14,16 @@ import TabSeasons from "./seasonSettings/TabSeasons";
 import SettingsHeader from "./SettingsHeader";
 import TabStylists from "./stylistSettings/TabStylists";
 import TabUsers from "./userSettings/TabUsers";
+import TabWorkPlace from "./workPlaceSettings/TabWorkPlace";
+import TabWorkers from "./workersSettings/TabWorkers";
 
 export default function Settings() {
   const queryClient = useQueryClient();
 
   const TabsListItems = [
     { id: "Users", name: "Utilisateurs", content: <TabUsers /> },
+    { id: "WorkPlace", name: "Atelier", content: <TabWorkPlace /> },
+    { id: "Workers", name: "Employés", content: <TabWorkers /> },
     { id: "Stylists", name: "Stylists", content: <TabStylists /> },
     { id: "Faconniers", name: "Faconniers", content: <TabFaconniers /> },
     { id: "Clients", name: "Clients", content: <TabClients /> },

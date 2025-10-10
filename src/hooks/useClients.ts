@@ -434,11 +434,20 @@ export function useToggleBonClient() {
       bonId,
       openBon,
       closeBon,
+      remise,
     }: {
       bonId: string;
       openBon: boolean;
       closeBon: boolean;
-    }) => clientService.toggleBonClient(bonId, seasonId, openBon, closeBon),
+      remise?: number;
+    }) =>
+      clientService.toggleBonClient({
+        bonId,
+        seasonId,
+        openBon,
+        closeBon,
+        remise,
+      }),
     onSuccess: async (data) => {
       if (data.status === "failed") {
         toast({

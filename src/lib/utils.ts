@@ -200,3 +200,30 @@ export const generateFileName = (
 export function formatIndex(index: number): string {
   return index < 9 ? `0${index + 1}` : `${index + 1}`;
 }
+
+export function parseWeekNameToDate(weekName: string | null): Date | undefined {
+  if (!weekName) return undefined;
+
+  const match = weekName.match(
+    /Du (\d{2}\/\d{2}\/\d{4}) au (\d{2}\/\d{2}\/\d{4})/
+  );
+  if (!match) return undefined;
+
+  const [, start] = match; // start = "01/09/2025"
+  const [day, month, year] = start.split("/").map(Number);
+
+  // Return as Date (local midnight)
+  return new Date(year, month - 1, day);
+}
+
+export function formatWeekDisplay(weekStart: Date, weekEnd: Date): string {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  return `Du ${formatDate(weekStart)} au ${formatDate(weekEnd)}`;
+}

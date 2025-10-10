@@ -16,6 +16,7 @@ import type {
   DeleteOrderFaconnier,
   ToggleBonFaconnier,
   DeleteBonFaconnier,
+  CancelOrderFaconnier,
 } from "@/types/types";
 
 export const faconnierService: {
@@ -35,6 +36,7 @@ export const faconnierService: {
   deleteOrderFaconnier: DeleteOrderFaconnier;
   toggleBonFaconnier: ToggleBonFaconnier;
   deleteBonFaconnier: DeleteBonFaconnier;
+  cancelOrderFaconnier: CancelOrderFaconnier;
 } = {
   fetchFaconniers: async (page, limit, search) => {
     try {
@@ -311,6 +313,31 @@ export const faconnierService: {
         message:
           error.response?.data?.message ||
           "No response from server. Please try again later.",
+      };
+    }
+  },
+
+  cancelOrderFaconnier: async (orderId: string) => {
+    try {
+      const result = await apiClient.patch(
+        `/api/v1/faconnier/orders/cancel/${orderId}`
+      );
+      //console.log('Cancel order faconnier result:', result)
+      return result.data;
+    } catch (error: any) {
+      console.error("Error canceling order faconnier:", error);
+      const { status, data } = error.response;
+      if (status === 400 && data.errors) {
+        return {
+          status: "failed",
+          message: data.errors[0].message || "Validation error",
+        };
+      }
+
+      return {
+        status: "failed",
+        message:
+          data.message || "No response from server. Please try again later.",
       };
     }
   },

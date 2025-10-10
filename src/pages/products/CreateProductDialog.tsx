@@ -288,12 +288,12 @@ function ProductForm({
         <div className="flex gap-2">
           <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
             <Label htmlFor="totalQty" className="text-base font-semibold">
-              Stock
+              Quantité
             </Label>
             <Input
               id="totalQty"
               name="totalQty"
-              placeholder="Entrez le stock du produit"
+              placeholder="Entrez le quantité du produit"
               type="number"
               className="border border-background/50 text-base placeholder:text-background/50"
               value={formData.totalQty}

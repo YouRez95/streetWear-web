@@ -647,3 +647,37 @@ export function useToggleBonFaconnier() {
     },
   });
 }
+
+export function useCancelOrderFaconnier() {
+  const queryClient = useQueryClient();
+  const { activeSeason } = useUserStore();
+  const seasonId = activeSeason?.id || "";
+
+  return useMutation({
+    mutationFn: (orderId: string) =>
+      faconnierService.cancelOrderFaconnier(orderId),
+    onSuccess: async (data) => {
+      if (data.status === "failed") {
+        toast({
+          title: "Error canceling order faconnier",
+          description: data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Order faconnier canceled successfully",
+        description:
+          data.message || "Order faconnier has been canceled successfully.",
+        variant: "default",
+      });
+    },
+    onError: (error) =>
+      showErrorToast("Error canceling order faconnier", error),
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeysDashboard.retardOrdersFaconnier(seasonId),
+      });
+    },
+  });
+}

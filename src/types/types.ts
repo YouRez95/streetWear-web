@@ -1,4 +1,5 @@
 import type {
+  CancelOrderFaconnierResponse,
   ClientData,
   CreateAvanceClientInput,
   CreateAvanceClientResponse,
@@ -33,6 +34,11 @@ import type {
   CreateStylistResponse,
   CreateUserInput,
   CreateUserResponse,
+  CreateWeekResponse,
+  CreateWorkerInput,
+  CreateWorkerResponse,
+  CreateWorkPlaceInput,
+  CreateWorkPlaceResponse,
   DeleteAvanceClientResponse,
   DeleteAvanceFaconnierResponse,
   DeleteAvanceStylistResponse,
@@ -44,6 +50,7 @@ import type {
   DeleteOrderFaconnierResponse,
   DeleteOrderStylistResponse,
   DeleteProductResponse,
+  DeleteWeekResponse,
   FaconnierData,
   FullSeasonData,
   GeneralSettings,
@@ -64,9 +71,18 @@ import type {
   GetStylistSummaryResponse,
   GetSummaryResponse,
   GetSummaryReturnStockResponse,
+  GetSummaryWorkerResponse,
+  GetSummaryWorkersResponse,
+  GetWeekRecordsResponse,
+  GetWeeksRecordsInput,
+  GetWorkerRecordsResponse,
+  GetWorkersResponse,
+  GetYearSummaryInput,
+  GetYearSummaryResponse,
   LoginFormType,
   QueryParams,
   StylistData,
+  ToggleBonClientInput,
   ToggleBonClientResponse,
   ToggleBonFaconnierResponse,
   ToggleBonStylistResponse,
@@ -85,7 +101,14 @@ import type {
   UpdateSeasonInput,
   UpdateStylistInput,
   UpdateUserInput,
+  UpdateWeekRecordInput,
+  UpdateWeekRecordPaymentInput,
+  UpdateWeekRecordResponse,
+  UpdateWorkerInput,
   UserData,
+  Week,
+  WorkerData,
+  WorkPlace,
 } from "./models";
 
 export type LoginUser = (userCreadentials: LoginFormType) => Promise<{
@@ -241,6 +264,10 @@ export type DeleteBonFaconnier = (
   bonId: string,
   seasonId: string
 ) => Promise<DeleteBonFaconnierResponse>;
+
+export type CancelOrderFaconnier = (
+  orderId: string
+) => Promise<CancelOrderFaconnierResponse>;
 
 // ======================= STYLIST TYPES ======================= //
 
@@ -422,10 +449,7 @@ export type DeleteOrderClient = (
 ) => Promise<DeleteOrderClientResponse>;
 
 export type ToggleBonClient = (
-  bonId: string,
-  seasonId: string,
-  openBon: boolean,
-  closeBon: boolean
+  toggleBonData: ToggleBonClientInput
 ) => Promise<ToggleBonClientResponse>;
 
 export type DeleteBonClient = (
@@ -473,3 +497,200 @@ export type DeleteUser = (userId: string) => Promise<CreateUserResponse>;
 export type UpdateUser = (
   userData: UpdateUserInput
 ) => Promise<CreateUserResponse>;
+
+// ======================= Workers TYPES ======================= //
+export type CreateWorkPlace = (
+  workPlaceData: Omit<CreateWorkPlaceInput, "id">
+) => Promise<CreateWorkPlaceResponse>;
+
+export type GetWorkPlacesByCursor = ({
+  take,
+  cursor,
+  search,
+}: {
+  take: number;
+  cursor: string;
+  search: string;
+}) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  workplaces: WorkPlace[];
+  nextCursor: string | null;
+}>;
+
+export type GetWorkPlaces = (
+  page: number,
+  limit: number,
+  search: string
+) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  workplaces: WorkPlace[];
+  currentPage: number;
+  totalPages: number;
+}>;
+
+export type UpdateWorkplace = (
+  workPlaceData: CreateWorkPlaceInput
+) => Promise<CreateWorkPlaceResponse>;
+export type DeleteWorkplace = (
+  workplaceId: string
+) => Promise<CreateWorkPlaceResponse>;
+
+export type CreateWorker = (
+  workerData: Omit<CreateWorkerInput, "id">
+) => Promise<CreateWorkerResponse>;
+export type GetWorkers = (
+  page: number,
+  limit: number,
+  search: string
+) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  workers: GetWorkersResponse[];
+  currentPage: number;
+  totalPages: number;
+}>;
+
+export type UpdateWorker = (
+  workerData: UpdateWorkerInput
+) => Promise<CreateWorkerResponse>;
+export type DeleteWorker = (workerId: string) => Promise<CreateWorkerResponse>;
+
+export type GetWorkersByCursor = ({
+  take,
+  cursor,
+  search,
+}: {
+  take: number;
+  cursor: string;
+  search: string;
+}) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  workers: (WorkerData & { workplace: { id: string; name: string } })[];
+  nextCursor: string | null;
+}>;
+
+export type UpdateWorkerStatus = ({
+  workerId,
+  isActive,
+}: {
+  workerId: string;
+  isActive: boolean;
+}) => Promise<CreateWorkerResponse>;
+
+export type GetWeeksByCursor = ({
+  workplaceId,
+  take,
+  cursor,
+  search,
+}: {
+  workplaceId: string;
+  take: number;
+  cursor: string;
+  search: string;
+}) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  weeks: Week[];
+  nextCursor: string | null;
+}>;
+
+export type CreateWeek = ({
+  weekStart,
+  workplaceId,
+}: {
+  weekStart: string;
+  workplaceId: string;
+}) => Promise<CreateWeekResponse>;
+export type UpdateWeek = ({
+  weekStart,
+  weekId,
+}: {
+  weekStart: string;
+  weekId: string;
+}) => Promise<CreateWeekResponse>;
+
+export type DeleteWeek = ({
+  weekId,
+  workplaceId,
+}: {
+  weekId: string;
+  workplaceId: string;
+}) => Promise<DeleteWeekResponse>;
+
+export type GetWeekRecords = ({
+  weekId,
+  workplaceId,
+}: GetWeeksRecordsInput) => Promise<GetWeekRecordsResponse>;
+
+export type UpdateWeekRecord = (
+  recordData: UpdateWeekRecordInput
+) => Promise<UpdateWeekRecordResponse>;
+
+export type UpdateWeekRecordPayment = (
+  recordData: UpdateWeekRecordPaymentInput
+) => Promise<UpdateWeekRecordResponse>;
+
+export type CreateWeekRecord = ({
+  weekId,
+  workerId,
+}: {
+  weekId: string;
+  workerId: string;
+}) => Promise<UpdateWeekRecordResponse>;
+
+export type DeleteWeekRecord = (
+  recordId: string
+) => Promise<UpdateWeekRecordResponse>;
+
+export type GetYearSummary = ({
+  year,
+  workplaceId,
+}: GetYearSummaryInput) => Promise<GetYearSummaryResponse>;
+
+export type Year = {
+  id: string;
+  year: number;
+  displayText: string;
+};
+
+export type GetYearByCursor = ({
+  workplaceId,
+  take,
+  cursor,
+  search,
+}: {
+  workplaceId: string;
+  take: number;
+  cursor: string;
+  search: string;
+}) => Promise<{
+  status: "success" | "failed";
+  message: string;
+  years: Year[];
+  nextCursor: string | null;
+}>;
+
+export type GetSummaryWorkers = ({
+  weekId,
+  workplaceId,
+}: {
+  weekId: string;
+  workplaceId: string;
+}) => Promise<GetSummaryWorkersResponse>;
+
+export type GetSummaryWorker = (
+  workerId: string
+) => Promise<GetSummaryWorkerResponse>;
+
+export type GetWorkerRecords = ({
+  limit,
+  page,
+  workerId,
+}: {
+  workerId: string;
+  page: number;
+  limit: number;
+}) => Promise<GetWorkerRecordsResponse>;

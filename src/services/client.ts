@@ -394,25 +394,30 @@ export const clientService: {
     }
   },
 
-  toggleBonClient: async (bonId, seasonId, openBon, closeBon) => {
+  toggleBonClient: async (toggleData) => {
+    const { bonId, closeBon, openBon, seasonId, remise } = toggleData;
+
     try {
       const result = await apiClient.patch(
-        `/api/v1/client/bon/${seasonId}/${bonId}?openBon=${openBon}&closeBon=${closeBon}`
+        `/api/v1/client/bon/${seasonId}/${bonId}?openBon=${openBon}&closeBon=${closeBon}`,
+        { remise: remise ? remise : 0 }
       );
+      //console.log('Open bon client result:', result)
       return result.data;
     } catch (error: any) {
-      console.error("Error toggling bon client:", error);
-      const { status, data } = error.response || {};
-      if (status === 400 && data?.errors) {
+      console.error("Error opening bon client:", error);
+      const { status, data } = error.response;
+      if (status === 400 && data.errors) {
         return {
           status: "failed",
           message: data.errors[0].message || "Validation error",
         };
       }
+
       return {
         status: "failed",
         message:
-          data?.message || "No response from server. Please try again later.",
+          data.message || "No response from server. Please try again later.",
       };
     }
   },
