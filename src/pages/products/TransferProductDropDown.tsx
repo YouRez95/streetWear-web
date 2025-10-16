@@ -12,6 +12,7 @@ import producersIcon from "@/assets/icons/producer-icon-1.svg";
 import stylistIcon from "@/assets/icons/stylists-icon.svg";
 import { TrendingUpDown } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 type TransferProductDropDownProps = {
   product: Product;
   setSelectedProduct: (product: any) => void;
@@ -35,7 +36,10 @@ export default function TransferProductDropDown({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <TrendingUpDown className="w-7 h-7 cursor-pointer text-secondary/70 border border-secondary/50 rounded-md p-1" />
+        <Button variant={"ghost"} className="border w-full lg:w-7 lg:h-7">
+          <TrendingUpDown className="w-7 h-7 cursor-pointer text-secondary/70" />
+          <span className="lg:hidden">Transferer</span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel className="text-base font-semibold flex items-center justify-center">

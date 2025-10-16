@@ -10,13 +10,13 @@ import { productService } from "@/services/product";
 import { useEffect } from "react";
 
 export const queryKeys = {
-  products: (page: number, limit: number, search: string, seasonId: string) => [
-    "products",
-    seasonId,
-    page,
-    limit,
-    search,
-  ],
+  products: (
+    page: number,
+    limit: number,
+    search: string,
+    date: string,
+    seasonId: string
+  ) => ["products", seasonId, page, limit, date, search],
   productsRoot: (seasonId: string) => ["products", seasonId],
   productsStatus: (seasonId: string) => ["productsStatus", seasonId],
 };
@@ -29,11 +29,22 @@ function showErrorToast(title: string, error: any) {
   });
 }
 
-export function useProducts(page: number, limit: number, search = "") {
+export function useProducts(
+  page: number,
+  limit: number,
+  search = "",
+  date: "asc" | "desc" = "asc"
+) {
   const { activeSeason } = useUserStore();
 
   const result = useQuery({
-    queryKey: queryKeys.products(page, limit, search, activeSeason?.id || ""),
+    queryKey: queryKeys.products(
+      page,
+      limit,
+      search,
+      date,
+      activeSeason?.id || ""
+    ),
     queryFn: () => {
       if (!activeSeason) {
         // Return a properly typed error response
@@ -49,6 +60,7 @@ export function useProducts(page: number, limit: number, search = "") {
         page,
         limit,
         search,
+        date,
         seasonId: activeSeason.id,
       });
     },

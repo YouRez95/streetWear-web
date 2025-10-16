@@ -292,7 +292,7 @@ function WorkerForm({
                 : "bg-background text-foreground"
             )}
           >
-            Créer un employé
+            Ajouter l'employé
           </Button>
         </div>
       </DialogFooter>

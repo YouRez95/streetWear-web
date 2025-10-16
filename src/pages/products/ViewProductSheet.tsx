@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { formatDateToDDMMYYYY, getImageUrl } from "@/lib/utils";
 import type { Product } from "@/types/models";
+import { Ruler, Scale } from "lucide-react";
 
 type ViewProductSheetProps = {
   product: Product;
@@ -63,6 +64,35 @@ export default function ViewProductSheet({
                 label="Quantité totale"
                 value={`${product.totalQty} pcs`}
               />
+              {/* Poids et Métrage */}
+              {(product.poids > 0 || product.metrage > 0) && (
+                <div className="pt-2 mt-2 border-t border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-1 h-4 bg-primary rounded-full" />
+                    <span className="text-sm font-semibold text-primary">
+                      Spécifications
+                    </span>
+                  </div>
+                  {product.poids > 0 && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-primary font-medium flex items-center gap-2">
+                        <Scale className="w-4 h-4" />
+                        Poids
+                      </span>
+                      <span className="font-semibold">{product.poids} kg</span>
+                    </div>
+                  )}
+                  {product.metrage > 0 && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-primary font-medium flex items-center gap-2">
+                        <Ruler className="w-4 h-4" />
+                        Métrage
+                      </span>
+                      <span className="font-semibold">{product.metrage} m</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -142,7 +172,7 @@ export default function ViewProductSheet({
                   value={product.ProductStatus.quantity_at_faconnier}
                 />
                 <StatusLine
-                  label="Prête"
+                  label="Stock prête"
                   value={product.ProductStatus.quantity_ready}
                 />
                 <StatusLine

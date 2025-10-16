@@ -15,10 +15,10 @@ export const productService: {
   deleteProduct: DeleteProduct;
   getAllProductsStatus: GetAllProductsStatus;
 } = {
-  fetchProducts: async ({ page, limit, search, seasonId }) => {
+  fetchProducts: async ({ page, limit, search, seasonId, date }) => {
     try {
       const result = await apiClient.get(
-        `/api/v1/product/all/${seasonId}?page=${page}&limit=${limit}&search=${search}`
+        `/api/v1/product/all/${seasonId}?page=${page}&limit=${limit}&search=${search}&date=${date}`
       );
 
       if (result.status === 200) return result.data;
@@ -65,6 +65,8 @@ export const productService: {
         "totalQty",
         "description",
         "createdAt",
+        "poids",
+        "metrage",
       ];
       fields.forEach((key) =>
         formData.append(key, (product as any)[key] || "")
@@ -120,6 +122,8 @@ export const productService: {
         "totalQty",
         "description",
         "createdAt",
+        "poids",
+        "metrage",
       ];
       fields.forEach((key) =>
         formData.append(key, (product as any)[key] || "")

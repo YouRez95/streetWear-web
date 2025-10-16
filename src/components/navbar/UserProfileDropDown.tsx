@@ -41,7 +41,7 @@ export default function UserProfileDropDown({
         <DropdownMenuSeparator />
 
         {/* Show navbar items only on small screens */}
-        <div className="block lg:hidden">
+        <div className="block xl:hidden">
           {navbarItems.map((item) => (
             <DropdownMenuItem
               key={item.id}
@@ -77,7 +77,7 @@ export default function UserProfileDropDown({
           </DropdownMenuItem>
         </div>
 
-        <div className="hidden lg:block">
+        <div className="hidden xl:block">
           <DropdownMenuItem
             onClick={onLogout}
             className="flex items-center gap-2 text-red-600"

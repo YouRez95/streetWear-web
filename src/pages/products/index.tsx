@@ -29,6 +29,7 @@ export default function Products() {
     useState(false);
   const [openTransferDialogStylist, setOpenTransferDialogStylist] =
     useState(false);
+  const [date, setDate] = useState<"asc" | "desc">("asc");
   return (
     <div className="min-h-screen w-full flex flex-col gap-4">
       <ProductsHeader />
@@ -44,6 +45,8 @@ export default function Products() {
               page={page}
               setTotalPages={setTotalPages}
               limit={limit}
+              date={date}
+              setDate={setDate}
               setOpenEditDialog={setOpenEditDialog}
               setOpenDeleteDialog={setOpenDeleteDialog}
               setSelectedProduct={setSelectedProduct}

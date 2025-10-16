@@ -33,7 +33,7 @@ export const Navbar = () => {
               StreetWear
             </h1>
           </Link>
-          <div className="lg:flex items-center gap-4 hidden">
+          <div className="xl:flex items-center gap-4 hidden">
             {navbarItems.map((item) => {
               return (
                 <NavLink to={item.link} key={item.id}>

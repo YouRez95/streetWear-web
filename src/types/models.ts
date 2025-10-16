@@ -143,6 +143,8 @@ export type Product = {
   id: string;
   name: string;
   description?: string;
+  poids: number;
+  metrage: number;
   reference: string;
   totalQty: number;
   type: "طبعة" | "طرزة" | "طبعة_طرزة" | null;
@@ -189,6 +191,7 @@ export type GetProductsParams = {
   page: number;
   limit: number;
   search: string;
+  date: string;
   seasonId: string;
 };
 
