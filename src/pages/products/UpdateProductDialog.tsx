@@ -158,6 +158,7 @@ export default function UpdateProductDialog({
             imageUrl={imageUrl}
             isMobile={isMobile}
             setFormData={setFormData}
+            isPending={updateProductMutation.isPending}
           />
         </DialogContent>
       </Dialog>
@@ -191,6 +192,7 @@ export default function UpdateProductDialog({
           imageUrl={imageUrl}
           isMobile={isMobile}
           setFormData={setFormData}
+          isPending={updateProductMutation.isPending}
         />
       </DialogContent>
     </Dialog>
@@ -206,6 +208,7 @@ const FormContent = ({
   imagePreview,
   imageUrl,
   setFormData,
+  isPending,
 }: {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleChange: (
@@ -222,6 +225,7 @@ const FormContent = ({
   imageUrl: string | null;
   error: string | null;
   isMobile: boolean;
+  isPending: boolean;
 }) => {
   return (
     <div className="flex-1 justify-between flex flex-col pb-5 md:pb-0">
@@ -400,8 +404,13 @@ const FormContent = ({
             </Button>
           </DialogClose>
 
-          <Button type="submit" className="w-fit" form="updateProductForm">
-            Mettre à jour le produit
+          <Button
+            type="submit"
+            className="w-fit"
+            form="updateProductForm"
+            disabled={isPending}
+          >
+            {isPending ? "Mise à jour..." : "Mettre à jour le produit"}
           </Button>
         </div>
       </div>

@@ -15,6 +15,7 @@ import StockReturn from "./pages/stockReturn";
 import Settings from "./pages/settings";
 import { ErrorPage } from "./pages/error";
 import Workers from "./pages/workers";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

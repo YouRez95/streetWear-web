@@ -31,6 +31,7 @@ import {
   useCreateBonClient,
   useCreateMultipleOrdersClient,
 } from "@/hooks/useClients";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 type SelectedClient = GetActiveClientsResponse["clients"][0];
 
@@ -474,7 +475,7 @@ const FormContent = ({
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <img
+                      <LazyLoadImage
                         src={getImageUrl(product.productImage, "product")}
                         alt={product.name}
                         onError={(e) => {
@@ -482,6 +483,8 @@ const FormContent = ({
                           target.src = defaultProductImage;
                         }}
                         className="w-16 h-16 object-cover rounded"
+                        loading="lazy"
+                        effect="blur"
                       />
                       <div>
                         <p className="font-medium">{product.name}</p>

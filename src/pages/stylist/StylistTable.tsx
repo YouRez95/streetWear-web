@@ -25,6 +25,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 const paymentMethodMap: Record<string, string> = {
   cash: "Espèces",
@@ -156,7 +157,9 @@ export default function StylistTable({
                   <TableCell>{order.reference}</TableCell>
                   <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
-                      <img
+                      <LazyLoadImage
+                        loading="lazy"
+                        effect="blur"
                         src={getImageUrl(order.productImage, "product")}
                         alt={order.id}
                         className="w-14 h-14 rounded-lg"

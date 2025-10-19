@@ -133,6 +133,7 @@ export default function CreateProductDialog({
             handleSubmit={handleSubmit}
             handleChange={handleChange}
             handleImageChange={handleImageChange}
+            isPending={createProductMutation.isPending}
           />
         </DialogContent>
       </Dialog>
@@ -164,6 +165,7 @@ export default function CreateProductDialog({
           handleSubmit={handleSubmit}
           handleChange={handleChange}
           handleImageChange={handleImageChange}
+          isPending={createProductMutation.isPending}
         />
       </DialogContent>
     </Dialog>
@@ -178,6 +180,7 @@ function ProductForm({
   handleSubmit,
   handleChange,
   handleImageChange,
+  isPending,
 }: {
   formData: CreateProductInput;
   setFormData: React.Dispatch<React.SetStateAction<CreateProductInput>>;
@@ -190,6 +193,7 @@ function ProductForm({
     >
   ) => void;
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isPending: boolean;
 }) {
   return (
     <div className="flex-1 justify-between flex flex-col pb-5 md:pb-0">
@@ -364,8 +368,13 @@ function ProductForm({
             </Button>
           </DialogClose>
 
-          <Button type="submit" className="w-fit" form="createProductForm">
-            Créer le produit
+          <Button
+            type="submit"
+            className="w-fit"
+            form="createProductForm"
+            disabled={isPending}
+          >
+            {isPending ? "Création..." : "Créer le produit"}
           </Button>
         </div>
       </div>

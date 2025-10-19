@@ -54,6 +54,7 @@ export function useStylists(
     queryFn: () => stylistService.getStylists(types, page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

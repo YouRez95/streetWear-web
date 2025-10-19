@@ -98,7 +98,8 @@ export default function ProductsHeader() {
                   {stat.label}
                 </p>
                 <p className="text-lg font-semibold font-bagel leading-snug">
-                  {stat.value.toLocaleString()} produits
+                  {stat.value.toLocaleString()}{" "}
+                  {stat.key === "total" ? "produits" : "pcs"}
                 </p>
                 {stat.subValue !== undefined && stat.subLabel && (
                   <p className="text-sm text-background">

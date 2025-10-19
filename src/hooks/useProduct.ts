@@ -66,6 +66,7 @@ export function useProducts(
     },
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 
   useEffect(() => {

@@ -40,6 +40,7 @@ export function useReturnStock(page: number, limit: number, search = "") {
     refetchOnWindowFocus: false,
     retry: false,
     enabled: !!activeSeason,
+    placeholderData: (prev) => prev,
   });
 }
 

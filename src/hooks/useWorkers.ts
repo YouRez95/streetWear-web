@@ -94,6 +94,7 @@ export function useWorkPlaces(page: number, limit: number, search = "") {
     queryFn: () => workersService.getWorkPlaces(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -110,6 +111,7 @@ export function useWorkPlacesByCursor(take: number, search = "") {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -208,6 +210,7 @@ export function useWorkers(page: number, limit: number, search = "") {
     queryFn: () => workersService.getWorkers(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -283,6 +286,7 @@ export function useWorkersByCursor(take: number, search = "") {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -366,6 +370,7 @@ export function useWeeksByCursor(
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -705,6 +710,7 @@ export function useYearsByCursor(
     refetchOnWindowFocus: false,
     retry: false,
     enabled: !!workplaceId,
+    placeholderData: (prev) => prev,
   });
 }
 

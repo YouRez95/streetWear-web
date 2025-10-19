@@ -49,6 +49,7 @@ export function useFaconniers(page: number, limit: number, search = "") {
     queryFn: () => faconnierService.fetchFaconniers(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

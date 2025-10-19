@@ -26,6 +26,7 @@ export function useUsers(page: number, limit: number, search = "") {
     queryFn: () => userService.fetchUsers(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

@@ -25,6 +25,7 @@ import { DeleteAvanceClientDialog } from "./DeleteAvanceClientDialog";
 import { DeleteOrderClientDialog } from "./DeleteOrderClientDialog";
 import { EditOrderClientDialog } from "./EditOrderClientDialog";
 import type { GetActiveClientsResponse } from "@/types/models";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 // import { DeleteAvanceDialog } from './DeleteAvanceDialog'
 // import { DeleteOrderFaconnierDialog } from './DeleteOrderFaconnierDialog'
 // import { EditOrderFaconnierDialog } from './EditOrderFaconnierDialog'
@@ -161,7 +162,9 @@ export default function ClientsTable({
                   <TableCell>{order.reference}</TableCell>
                   <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
-                      <img
+                      <LazyLoadImage
+                        loading="lazy"
+                        effect="blur"
                         src={getImageUrl(order.productImage, "product")}
                         alt={order.id}
                         className="w-14 h-14 rounded-lg"

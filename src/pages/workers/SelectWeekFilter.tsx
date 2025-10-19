@@ -114,7 +114,14 @@ export default function SelectWeekFilter({
               className="w-full border border-background/50 focus:ring-0 focus:border-background placeholder:text-background/35"
             />
           </div>
-          {status === "pending" && (
+          {!workplaceId && (
+            <div className="flex items-center justify-center p-4">
+              <span className="ml-2 text-background/30">
+                Choisir un atelier
+              </span>
+            </div>
+          )}
+          {workplaceId && status === "pending" && (
             <div className="flex items-center justify-center p-4">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
               <span className="ml-2">Chargement des semaines...</span>

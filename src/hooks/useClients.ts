@@ -51,6 +51,7 @@ export function useClients(page: number, limit: number, search = "") {
     queryFn: () => clientService.fetchClients(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { useProducts } from "@/hooks/useProduct";
 import { formatDateToDDMMYYYY, getImageUrl } from "@/lib/utils";
 import { useDebounce } from "@uidotdev/usehooks";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 import {
   ArrowUpDown,
   ChevronDown,
@@ -116,9 +117,11 @@ function ProductCard({
     <div className="bg-white border rounded-lg p-4 mb-4 shadow-sm hover:shadow-md transition-shadow">
       {/* Header: Image, Ref, Name */}
       <div className="flex gap-3 mb-4">
-        <img
+        <LazyLoadImage
           src={getImageUrl(product.productImage, "product")}
+          loading="lazy"
           alt={product.id}
+          effect="blur"
           className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
           onError={(e) => {
             e.currentTarget.src = defaultProductImage;
@@ -412,9 +415,11 @@ export default function ProductsTable({
                   </TableCell>
                   <TableCell className="font-medium max-w-[200px] min-w-[200px]">
                     <div className="flex items-center gap-3">
-                      <img
+                      <LazyLoadImage
                         src={getImageUrl(product.productImage, "product")}
+                        loading="lazy"
                         alt={product.id}
+                        effect="blur"
                         className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         onError={(e) => {
                           e.currentTarget.src = defaultProductImage;

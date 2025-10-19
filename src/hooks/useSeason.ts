@@ -26,6 +26,7 @@ export function useSeasons(page: number, limit: number, search = "") {
     queryFn: () => seasonsService.fetchSeasons(page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

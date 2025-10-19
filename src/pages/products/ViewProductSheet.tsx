@@ -10,6 +10,7 @@ import {
 import { formatDateToDDMMYYYY, getImageUrl } from "@/lib/utils";
 import type { Product } from "@/types/models";
 import { Ruler, Scale } from "lucide-react";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 type ViewProductSheetProps = {
   product: Product;
@@ -38,9 +39,11 @@ export default function ViewProductSheet({
           {/* Image */}
           <Card className="bg-muted border-none shadow-none">
             <CardContent className="md:p-4">
-              <img
+              <LazyLoadImage
                 src={getImageUrl(product.productImage, "product")}
                 alt={product.name}
+                loading="lazy"
+                effect="blur"
                 className="w-full h-[280px] object-contain rounded-lg"
                 onError={(e) => {
                   e.currentTarget.src = defaultProductImage;
