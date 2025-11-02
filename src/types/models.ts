@@ -251,6 +251,7 @@ export type CreateProductInput = Omit<
 > & {
   productImage: ArrayBuffer | null;
   fileName: string | null;
+  readyQty: number;
 };
 
 export type CreateProductResponse = {

@@ -138,6 +138,10 @@ export function validateProductForm(
     return "La quantité totale est requise.";
   }
 
+  if (formData.readyQty > formData.totalQty) {
+    return "La quantité prête ne peut pas dépasser la quantité totale";
+  }
+
   if (!formData.createdAt) {
     return "La date est requise.";
   }

@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateProduct } from "@/hooks/useProduct";
 import { validateProductForm } from "@/lib/utils";
 import type { CreateProductInput } from "@/types/models";
-import { Ruler, Scale, Upload, X } from "lucide-react";
+import { Package, PackageCheck, Ruler, Scale, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 
@@ -29,6 +29,7 @@ const initialFormData: CreateProductInput = {
   description: "",
   reference: "",
   totalQty: 0,
+  readyQty: 0,
   productImage: null,
   fileName: null,
   createdAt: new Date().toISOString(),
@@ -195,6 +196,11 @@ function ProductForm({
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isPending: boolean;
 }) {
+  // Calculate percentage of ready quantity
+  const readyPercentage =
+    formData.totalQty > 0
+      ? Math.round((formData.readyQty / formData.totalQty) * 100)
+      : 0;
   return (
     <div className="flex-1 justify-between flex flex-col pb-5 md:pb-0">
       <form
@@ -290,23 +296,82 @@ function ProductForm({
           </div>
         </div>
 
-        {/* Stock & Type */}
-        <div className="flex gap-2">
-          <div className="flex-1 flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
-            <Label htmlFor="totalQty" className="text-base font-semibold">
-              Quantité
-            </Label>
-            <Input
-              id="totalQty"
-              name="totalQty"
-              placeholder="Entrez le quantité du produit"
-              type="number"
-              className="border border-background/50 text-base placeholder:text-background/50"
-              value={formData.totalQty}
-              onChange={handleChange}
-            />
+        {/* Stock Section - Enhanced with Ready Quantity */}
+        <div className="bg-muted-foreground p-3 rounded-lg">
+          <h1 className="text-base font-semibold">Gestion des stocks</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="totalQty"
+                className="text-base font-medium flex items-center gap-2"
+              >
+                <Package className="w-4 h-4" />
+                Quantité totale
+              </Label>
+              <Input
+                id="totalQty"
+                name="totalQty"
+                placeholder="Quantité totale"
+                type="number"
+                min="0"
+                className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
+                value={formData.totalQty}
+                onChange={handleChange}
+              />
+              <p className="text-xs text-background/60">
+                Quantité totale du produit
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="readyQty"
+                className="text-base font-medium flex items-center gap-2"
+              >
+                <PackageCheck className="w-4 h-4" />
+                Quantité prête
+              </Label>
+              <Input
+                id="readyQty"
+                name="readyQty"
+                placeholder="Quantité disponible"
+                type="number"
+                min="0"
+                max={formData.totalQty}
+                className="border border-background/50 text-[14px] md:text-[14px] placeholder:text-background/50"
+                value={formData.readyQty}
+                onChange={handleChange}
+              />
+              <p className="text-xs text-background/60">
+                Quantité actuellement disponible
+              </p>
+            </div>
           </div>
+
+          {/* Progress indicator */}
+          {formData.totalQty > 0 && (
+            <div className="mt-3 pt-3 border-t border-background/20">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-background/80">
+                  Progression
+                </span>
+                <span className="text-sm font-semibold">
+                  {readyPercentage}%
+                </span>
+              </div>
+              <div className="w-full bg-background/20 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-green-500 h-full transition-all duration-300 rounded-full"
+                  style={{ width: `${Math.min(readyPercentage, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-background/60 mt-1">
+                {formData.readyQty} / {formData.totalQty} unités prêtes
+              </p>
+            </div>
+          )}
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-col gap-2 bg-muted-foreground p-2 rounded-lg">
             <Label
