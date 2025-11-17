@@ -251,7 +251,7 @@ export type CreateProductInput = Omit<
 > & {
   productImage: ArrayBuffer | null;
   fileName: string | null;
-  readyQty: number;
+  isReady: boolean;
 };
 
 export type CreateProductResponse = {
@@ -416,6 +416,10 @@ type BonClientData = {
   clientId: string;
 };
 
+export type CreateBonClientPassagerInput = {
+  seasonId: string;
+};
+
 export type CreateBonClientResponse = {
   status: "success" | "failed";
   message: string;
@@ -430,6 +434,16 @@ export type CreateOrderStylistInput = {
   priceByUnit: number;
   transferQuantity: number;
   date: string;
+};
+
+export type GetBonClientPassagerResponse = {
+  status: "success" | "failed";
+  message: string;
+  bons?: {
+    id: string;
+    createdAt: string;
+    bon_number: number;
+  }[];
 };
 
 export type OrderStylistData = {
@@ -474,7 +488,8 @@ export type CreateOrderFaconnierResponse = {
 
 export type CreateOrderClientInput = {
   seasonId: string;
-  clientId: string;
+  clientId: string | null;
+  passagerName: string | null;
   productId: string;
   bon_number: number;
   priceByUnit: number;
@@ -1100,6 +1115,8 @@ export type GetSummaryWorkersResponse = {
     totalSpent: number;
     totalWeeks: number;
     totalWorkers: number;
+    totalAdvances: number;
+    restApayer: number;
   };
 };
 

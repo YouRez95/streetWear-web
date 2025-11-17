@@ -265,6 +265,83 @@ export function useCreateBonClient() {
   });
 }
 
+export function useCreateBonClientPassager() {
+  const queryClient = useQueryClient();
+  const { activeSeason } = useUserStore();
+  const seasonId = activeSeason?.id || "";
+
+  return useMutation({
+    mutationFn: () => clientService.createBonClientPassager({ seasonId }),
+    onSuccess: async (data) => {
+      if (data.status === "failed") {
+        toast({
+          title: "Error creating bon client",
+          description: data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Bon client created successfully",
+        description:
+          data.message || "Bon client has been created successfully.",
+        variant: "default",
+      });
+    },
+    onError: (error) => showErrorToast("Error creating bon faconnier", error),
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["bonsClientPassager", seasonId],
+        exact: false,
+      });
+    },
+  });
+}
+
+export function useBonsClientPassager() {
+  const { activeSeason } = useUserStore();
+  return useQuery({
+    queryKey: ["bonsClientPassager", activeSeason?.id],
+    queryFn: () => {
+      return clientService.getBonsClientPassager(activeSeason?.id || "");
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+    enabled: !!activeSeason,
+  });
+}
+
+export function useActiveClientsAndPassager(
+  openBon: boolean = true,
+  closedBon: boolean = false
+) {
+  const { activeSeason } = useUserStore();
+  return useQuery({
+    queryKey: [
+      ...queryKeys.activeClients(activeSeason?.id || ""),
+      "passager",
+      openBon,
+      closedBon,
+    ],
+    queryFn: () => {
+      if (!activeSeason) {
+        return Promise.resolve<GetActiveClientsResponse>({
+          status: "failed",
+          message: "No active season",
+          clients: [],
+        });
+      }
+      return clientService.getActiveClientsAndPassager(
+        activeSeason.id,
+        openBon,
+        closedBon
+      );
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
 export function useCreateOrderClient() {
   const queryClient = useQueryClient();
   const { activeSeason } = useUserStore();
@@ -303,10 +380,12 @@ export function useCreateOrderClient() {
           data?.order?.bon_id,
         ],
       });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.clientSummary(seasonId, variables.clientId, ""),
-        exact: false,
-      });
+      if (variables.clientId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.clientSummary(seasonId, variables.clientId, ""),
+          exact: false,
+        });
+      }
       queryClient.invalidateQueries({
         queryKey: queryKeysProducts.productsRoot(seasonId),
         exact: false,

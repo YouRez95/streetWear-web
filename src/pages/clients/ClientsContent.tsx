@@ -1,4 +1,4 @@
-import { useActiveClients } from "@/hooks/useClients";
+import { useActiveClientsAndPassager } from "@/hooks/useClients";
 import { useUserStore } from "@/store/userStore";
 import ClientsContentHeader from "./ClientsContentHeader";
 import ClientsTable from "./ClientsTable";
@@ -31,7 +31,10 @@ export default function ClientsContent({
   setDate,
 }: ClientsContentProps) {
   const { selectedClientId, selectedClientBonId } = useUserStore();
-  const { data: activeClients } = useActiveClients(openBon, closedBon);
+  const { data: activeClients } = useActiveClientsAndPassager(
+    openBon,
+    closedBon
+  );
   const selectedClient = (activeClients?.clients ?? []).find(
     (client) => client.id === selectedClientId
   );

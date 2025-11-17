@@ -67,7 +67,7 @@ export const productService: {
         "createdAt",
         "poids",
         "metrage",
-        "readyQty",
+        "isReady",
       ];
       fields.forEach((key) =>
         formData.append(key, (product as any)[key] || "")
@@ -125,7 +125,7 @@ export const productService: {
         "createdAt",
         "poids",
         "metrage",
-        "readyQty",
+        "isReady",
       ];
       fields.forEach((key) =>
         formData.append(key, (product as any)[key] || "")

@@ -49,8 +49,9 @@ export const queryKeysWorkers = {
     search: string
   ) => ["years-cursor", workplaceId, take, cursor, search],
   workersRoot: ["workers"] as const,
-  workers: (page: number, limit: number, search: string) => [
+  workers: (active: string[], page: number, limit: number, search: string) => [
     "workers",
+    active,
     page,
     limit,
     search,
@@ -204,10 +205,15 @@ export function useDeleteWorkplace() {
   });
 }
 
-export function useWorkers(page: number, limit: number, search = "") {
+export function useWorkers(
+  active: string[],
+  page: number,
+  limit: number,
+  search = ""
+) {
   return useQuery({
-    queryKey: queryKeysWorkers.workers(page, limit, search),
-    queryFn: () => workersService.getWorkers(page, limit, search),
+    queryKey: queryKeysWorkers.workers(active, page, limit, search),
+    queryFn: () => workersService.getWorkers(active, page, limit, search),
     refetchOnWindowFocus: false,
     retry: false,
     placeholderData: (prev) => prev,

@@ -29,12 +29,16 @@ import {
   Trash,
   Unlock,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddAvanceDialog from "../faconnier/AddAvanceDialog";
 import { CloseBonDialog } from "./CloseBonDialog";
 import { DeleteBonDialog } from "./DeleteBonDialog";
 import { OpenBonDialog } from "./OpenBonDialog";
 import type { GetActiveClientsResponse } from "@/types/models";
+import {
+  SearchableSelect,
+  type SelectOption,
+} from "../stylist/SearchableSelect";
 
 interface ClientsContentHeaderProps {
   openBon: boolean;
@@ -105,12 +109,19 @@ export default function ClientsContentHeader({
     setOpenAvanceDialog(true);
   };
 
+  const clientOptions: SelectOption[] = useMemo(() => {
+    return (activeClients?.clients ?? []).map((client) => ({
+      id: client.id,
+      name: client.name,
+    }));
+  }, [activeClients]);
+
   return (
     <div className="flex flex-col lg:flex-row lg:flex-wrap lg:justify-between lg:items-center gap-4 md:gap-6 mb-10 w-full">
       {/* Left Section (Selectors) */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
         {/* Client Dropdown */}
-        <Select
+        {/* <Select
           value={selectedClientId}
           onValueChange={(val) => setSelectedClientId(val)}
         >
@@ -124,7 +135,16 @@ export default function ClientsContentHeader({
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
+        <SearchableSelect
+          value={selectedClientId}
+          onValueChange={setSelectedClientId}
+          options={clientOptions}
+          placeholder="Select Client"
+          searchPlaceholder="Search client..."
+          showType={false}
+          className="w-[200px]"
+        />
 
         {/* Bons Dropdown */}
         <Select
@@ -188,7 +208,7 @@ export default function ClientsContentHeader({
           )}
 
           {/* Add Avance */}
-          {selectedClient && selectedBon && (
+          {selectedClient && selectedBon && selectedClientId !== "passager" && (
             <Button
               onClick={handleOpenAvanceDialog}
               className="flex items-center gap-2"
@@ -230,7 +250,7 @@ export default function ClientsContentHeader({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="open" className="text-sm">
-                    Actifs
+                    Ouverts
                   </Label>
                   <Switch
                     id="open"

@@ -15,7 +15,7 @@ export default function HeaderWorkers({
   const workplaceActive =
     currentView === "weekly" ? workplaceId : workplaceIdYear;
 
-  const { data, isPending, isEnabled } = useSummaryWorkers({
+  const { data, isPending } = useSummaryWorkers({
     weekId,
     workplaceId: workplaceActive,
   });
@@ -27,12 +27,15 @@ export default function HeaderWorkers({
     totalOvertimeHours: 0,
     totalSpent: 0,
     totalWeeks: 0,
+    totalAdvances: 0,
+    restApayer: 0,
   };
-  const totalWorkers = summaryData.totalWorkers || 0;
+  const totalWorkers = summaryData.totalWorkers;
   const totalHours =
-    (summaryData.totalRegularHours || 0) +
-    (summaryData.totalOvertimeHours || 0);
-  const totalSpent = summaryData.totalSpent || 0;
+    summaryData.totalRegularHours + summaryData.totalOvertimeHours;
+  const totalSpent = summaryData.totalSpent;
+  const totalAdvances = summaryData.totalAdvances;
+  const totalRestApayer = summaryData.restApayer;
 
   return (
     <div className="relative overflow-hidden">
@@ -60,42 +63,79 @@ export default function HeaderWorkers({
               </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="flex flex-wrap gap-3">
-              <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-3 border border-white/20 shadow-lg">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-300" />
-                  <div>
-                    <p className="text-xs font-medium text-blue-100">
-                      Employés
-                    </p>
-                    <p className="text-xl font-bold text-white">
-                      {isPending ? "..." : totalWorkers}
-                    </p>
-                  </div>
+            {/* Stats Groups */}
+            {currentView === "yearly" && (
+              <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-4 border border-white/20 shadow-lg flex items-center gap-3">
+                <DollarSign className="h-5 w-5 text-emerald-300" />
+                <div>
+                  <p className="text-xs font-medium text-blue-100">
+                    Coût total annuel
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {isPending ? "..." : totalYear}
+                  </p>
                 </div>
               </div>
+            )}
+            {currentView === "weekly" && (
+              <div className="flex flex-col gap-4 w-full">
+                {/* Top 3 main KPIs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Employees */}
+                  <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-4 border border-white/20 shadow-lg flex items-center gap-3">
+                    <TrendingUp className="h-5 w-5 text-emerald-300" />
+                    <div>
+                      <p className="text-xs font-medium text-blue-100">
+                        Employés
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {isPending ? "..." : totalWorkers}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-3 border border-white/20 shadow-lg">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-green-300" />
-                  <div>
-                    <p className="text-xs font-medium text-blue-100">
-                      Coût total
-                    </p>
-                    <p className="text-xl font-bold text-white">
-                      {currentView === "weekly"
-                        ? isPending
+                  {/* Total Spent */}
+                  <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-4 border border-white/20 shadow-lg flex items-center gap-3">
+                    <DollarSign className="h-5 w-5 text-green-300" />
+                    <div>
+                      <p className="text-xs font-medium text-blue-100">
+                        Coût total
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {isPending ? "..." : `${totalSpent.toFixed(0)} DHS`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Reste à payer */}
+                  <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-4 border border-white/20 shadow-lg flex items-center gap-3">
+                    <DollarSign className="h-5 w-5 text-emerald-300" />
+                    <div>
+                      <p className="text-xs font-medium text-blue-100">
+                        Reste à Payer
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {isPending
                           ? "..."
-                          : `${totalSpent.toFixed(0)} DHS`
-                        : totalYear
-                        ? `${totalYear} DHS`
-                        : "0 DHS"}
-                    </p>
+                          : `${totalRestApayer.toFixed(0)} DHS`}
+                      </p>
+                    </div>
                   </div>
                 </div>
+
+                {/* Secondary KPIs row */}
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-white/90 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-sm">
+                    Avances : {totalAdvances.toFixed(0)} DHS
+                  </span>
+
+                  <span className="text-white/90 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-sm">
+                    Coût après avances :{" "}
+                    {(totalSpent - totalAdvances).toFixed(0)} DHS
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex items-center gap-6">
@@ -152,7 +192,7 @@ export default function HeaderWorkers({
           </div>
 
           {/* Enhanced Loading indicator */}
-          {isEnabled && isPending && (
+          {isPending && (
             <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
               <div className="relative">
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white shadow-lg"></div>
@@ -197,7 +237,7 @@ export default function HeaderWorkers({
                 Semaines Travaillées
               </p>
               <p className="text-sm font-bold text-white">
-                {summaryData.totalWeeks || 0} semaines
+                {summaryData.totalWeeks || 0}
               </p>
             </div>
           </div>

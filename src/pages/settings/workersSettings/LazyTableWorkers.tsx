@@ -33,6 +33,8 @@ function LazyTableWorkers({ workers, openDialog }: LazyTableWorkersProps) {
     [openDialog]
   );
 
+  console.log("Rendering LazyTableWorkers", workers);
+
   return (
     <Table className="border-background rounded-xl overflow-hidden text-base">
       <TableCaption className="sr-only">Liste de vos employés</TableCaption>

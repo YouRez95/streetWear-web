@@ -8,6 +8,7 @@ import type {
   CreateAvanceStylistInput,
   CreateAvanceStylistResponse,
   CreateBonClientInput,
+  CreateBonClientPassagerInput,
   CreateBonClientResponse,
   CreateBonFaconnierInput,
   CreateBonFaconnierResponse,
@@ -58,6 +59,7 @@ import type {
   GetActiveFaconniersResponse,
   GetActiveStylistsResponse,
   GetAllProductsStatusResponse,
+  GetBonClientPassagerResponse,
   GetClientSummaryResponse,
   GetFaconnierSummaryResponse,
   GetOrdersClientResponse,
@@ -457,6 +459,14 @@ export type DeleteBonClient = (
   seasonId: string
 ) => Promise<DeleteBonClientResponse>;
 
+export type CreateBonClientPassager = (
+  bonData: CreateBonClientPassagerInput
+) => Promise<CreateBonClientResponse>;
+
+export type GetBonsClientPassager = (
+  seasonId: string
+) => Promise<GetBonClientPassagerResponse>;
+
 // ======================= RETURN STOCK TYPES ======================= //
 export type GetReturnStock = (
   getReturnStockData: GetReturnStockParams
@@ -541,6 +551,7 @@ export type CreateWorker = (
   workerData: Omit<CreateWorkerInput, "id">
 ) => Promise<CreateWorkerResponse>;
 export type GetWorkers = (
+  active: string[],
   page: number,
   limit: number,
   search: string
@@ -574,10 +585,10 @@ export type GetWorkersByCursor = ({
 
 export type UpdateWorkerStatus = ({
   workerId,
-  isActive,
+  status,
 }: {
   workerId: string;
-  isActive: boolean;
+  status: boolean;
 }) => Promise<CreateWorkerResponse>;
 
 export type GetWeeksByCursor = ({

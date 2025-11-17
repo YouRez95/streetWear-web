@@ -162,10 +162,15 @@ export const workersService: {
     }
   },
 
-  getWorkers: async (page, limit, search) => {
+  getWorkers: async (active, page, limit, search) => {
+    let type = "";
+    if (active.length === 1) {
+      type = active[0];
+    }
+
     try {
       const result = await apiClient.get(
-        `/api/v1/worker/all?page=${page}&limit=${limit}&search=${search}`
+        `/api/v1/worker/all?page=${page}&limit=${limit}&search=${search}&type=${type}`
       );
       return result.data;
     } catch (error: any) {
@@ -234,8 +239,9 @@ export const workersService: {
     }
   },
 
-  updateWorkerStatus: async ({ workerId, isActive }) => {
+  updateWorkerStatus: async ({ workerId, status }) => {
     try {
+      const isActive = status;
       const result = await apiClient.patch(
         `/api/v1/worker/${workerId}/status`,
         { isActive }
