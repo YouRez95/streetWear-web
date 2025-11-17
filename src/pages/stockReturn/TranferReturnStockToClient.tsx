@@ -8,19 +8,32 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import productLogo from "@/assets/icons/products-icon.svg";
 import DatePicker from "@/components/datePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useActiveClients, useCreateBonClient } from "@/hooks/useClients";
+import {
+  useActiveClients,
+  useBonsClientPassager,
+  useCreateBonClient,
+  useCreateBonClientPassager,
+} from "@/hooks/useClients";
 import { useCreateOrderClientFromReturnStock } from "@/hooks/useReturnStock";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
-import { ChevronDown, PlusIcon, X } from "lucide-react";
+import {
+  Calculator,
+  Calendar,
+  PlusIcon,
+  RotateCcw,
+  Tag,
+  User,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { Badge } from "@/components/ui/badge";
 import type { GetActiveClientsResponse, ReturnStock } from "@/types/models";
+import SearchableDropdown from "../products/SearchableDropDown";
 
 type TransferProductClientDialogProps = {
   product: ReturnStock;
@@ -36,6 +49,8 @@ type FormData = {
   priceByUnit: number;
   bon_number: number | null;
   date: string | null;
+  passagerName: string | null;
+  clientType: "regular" | "passager";
 };
 
 export default function TranferReturnStockToClient({
@@ -45,22 +60,35 @@ export default function TranferReturnStockToClient({
 }: TransferProductClientDialogProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { mutate: createBonClient } = useCreateBonClient();
+  const { mutate: createBonClientForPassager } = useCreateBonClientPassager();
   const { activeSeason } = useUserStore();
   const [error, setError] = useState<string | null>(null);
   const [selectClient, setSelectClient] = useState<SelectedClient>();
   const [selectBonNumber, setSelectBonNumber] = useState<number | null>(null);
   const { data: activeClients } = useActiveClients();
+  const { data: bonClientPassager } = useBonsClientPassager();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBonNumberOpen, setIsBonNumberOpen] = useState(false);
+  const [bonsForPassager, setBonsForPassager] = useState<number[]>([]);
   const [formData, setFormData] = useState<FormData>({
     clientId: null,
     transferQuantity: product.stockInfo.availableForTransfer,
     priceByUnit: 0,
     bon_number: null,
     date: new Date().toISOString(),
+    clientType: "regular",
+    passagerName: null,
   });
   const { mutate: createOrderClient } = useCreateOrderClientFromReturnStock();
 
+  useEffect(() => {
+    if (bonClientPassager && bonClientPassager.bons) {
+      const bonNumbers = bonClientPassager.bons.map((bon) => bon.bon_number);
+      setBonsForPassager(bonNumbers);
+      setSelectBonNumber(bonNumbers[0]);
+    }
+  }, [bonClientPassager]);
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
@@ -70,6 +98,8 @@ export default function TranferReturnStockToClient({
         priceByUnit: 0,
         bon_number: null,
         date: new Date().toISOString(),
+        clientType: "regular",
+        passagerName: null,
       });
       setError(null);
       setSelectClient(undefined);
@@ -85,10 +115,25 @@ export default function TranferReturnStockToClient({
       priceByUnit: 0,
       bon_number: null,
       date: new Date().toISOString(),
+      clientType: "regular",
+      passagerName: null,
     });
     setError(null);
     setSelectClient(undefined);
     setSelectBonNumber(null);
+  };
+
+  const handleClientTypeChange = (type: "regular" | "passager") => {
+    setFormData((prevData) => ({
+      ...prevData,
+      clientType: type,
+      clientId: type === "regular" ? prevData.clientId : null,
+      passagerName: type === "passager" ? prevData.passagerName : null,
+      bon_number: null,
+    }));
+    setSelectClient(undefined);
+    setSelectBonNumber(null);
+    setError(null);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,69 +143,119 @@ export default function TranferReturnStockToClient({
   };
 
   const handleTransfer = () => {
-    if (!formData.clientId) return setError("Veuillez sélectionner un client");
+    if (formData.clientType === "regular" && !formData.clientId) {
+      setError("Veuillez sélectionner un client");
+      return;
+    }
+
+    if (formData.clientType === "passager" && !formData.passagerName?.trim()) {
+      setError("Veuillez entrer le nom du client passager");
+      return;
+    }
+
     if (formData.transferQuantity > product.stockInfo.availableForTransfer) {
       if (product.stockInfo.availableForTransfer === 0) {
-        return setError("Aucune unité disponible pour ce produit");
+        setError("Aucune unité disponible pour ce produit");
       } else {
-        return setError(
-          `Vous ne pouvez transférer que ${product.stockInfo.availableForTransfer} unités`
+        setError(
+          "Vous ne pouvez transférer que " +
+            product.stockInfo.availableForTransfer +
+            " unités"
         );
       }
+      return;
     }
-    if (formData.priceByUnit <= 0)
-      return setError("Le prix par unité doit être supérieur à 0");
-    if (formData.transferQuantity <= 0)
-      return setError("La quantité doit être supérieure à 0");
-    if (!formData.bon_number)
-      return setError("Veuillez sélectionner un numéro de bon");
-    if (!formData.date) return setError("Veuillez sélectionner une date");
+    if (formData.priceByUnit <= 0) {
+      setError("Le prix par unité doit être supérieur à 0");
+      return;
+    }
+    if (formData.transferQuantity <= 0) {
+      setError("La quantité de transfert doit être supérieure à 0");
+      return;
+    }
 
+    if (!formData.bon_number) {
+      setError("Veuillez sélectionner un numéro de bon");
+      return;
+    }
+
+    if (!formData.date) {
+      setError("Veuillez sélectionner une date");
+      return;
+    }
     setError(null);
 
-    createOrderClient(
-      {
-        clientId: formData.clientId,
-        productId: product.id,
-        transferQuantity: Number(formData.transferQuantity),
-        priceByUnit: Number(formData.priceByUnit),
-        bon_number: Number(formData.bon_number),
-        date: formData.date,
+    const orderData = {
+      clientId: formData.clientType === "regular" ? formData.clientId : null,
+      passagerName:
+        formData.clientType === "passager" ? formData.passagerName : null,
+      productId: product.id,
+      transferQuantity: Number(formData.transferQuantity),
+      priceByUnit: Number(formData.priceByUnit),
+      bon_number: Number(formData.bon_number),
+      date: formData.date,
+    };
+    createOrderClient(orderData, {
+      onSuccess: (data) => {
+        if (data.status === "failed") {
+          return;
+        }
+        closeDialog();
       },
-      { onSuccess: (data) => data.status !== "failed" && closeDialog() }
-    );
+    });
   };
 
   // Add Bon Number
   const handleAddBonNumber = () => {
-    if (activeSeason && selectClient?.id) {
+    if (activeSeason && formData.clientType === "regular" && selectClient?.id) {
       createBonClient(selectClient.id, {
         onSuccess: (data) => {
-          if (data.status === "failed") return;
-          setSelectClient((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  BonsClients: [
-                    {
-                      bon_number: data.bon?.bon_number as number,
-                      id: data.bon?.id as string,
-                      bonStatus: "OPEN",
-                    },
-                    ...prev.BonsClients,
-                  ],
-                }
-              : prev
-          );
+          if (data.status === "failed") {
+            return;
+          }
+          setSelectClient((prevClient) => {
+            if (!prevClient) return prevClient;
+            return {
+              ...prevClient,
+              BonsClients: [
+                {
+                  bon_number: data.bon?.bon_number as number,
+                  id: data.bon?.id as string,
+                  bonStatus: "OPEN",
+                },
+                ...prevClient.BonsClients,
+              ],
+            };
+          });
           setSelectBonNumber(data.bon?.bon_number as number);
-          setFormData((prev) => ({
-            ...prev,
+          setFormData((prevData) => ({
+            ...prevData,
+            bon_number: data.bon?.bon_number as number,
+          }));
+        },
+      });
+    } else {
+      createBonClientForPassager(undefined, {
+        onSuccess: (data) => {
+          if (data.status === "failed") {
+            return;
+          }
+          setBonsForPassager((prevBons) => [
+            data.bon?.bon_number as number,
+            ...prevBons,
+          ]);
+          setSelectBonNumber(data.bon?.bon_number as number);
+          setFormData((prevData) => ({
+            ...prevData,
             bon_number: data.bon?.bon_number as number,
           }));
         },
       });
     }
   };
+
+  const totalPrice = formData.transferQuantity * formData.priceByUnit;
+  const availableQuantity = product.stockInfo.availableForTransfer;
 
   return (
     <Dialog open={open} onOpenChange={closeDialog}>
@@ -187,40 +282,28 @@ export default function TranferReturnStockToClient({
           </div>
         )}
 
-        <DialogHeader className="flex flex-col gap-3 pb-4 pt-5 md:pt-0">
-          <DialogTitle className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <img
-                src={productLogo}
-                alt="logo-produit"
-                className="w-10 h-10 border bg-primary/10 p-2 rounded-lg"
-              />
-              <p
-                className={cn("font-bagel", isMobile ? "text-xl" : "text-2xl")}
-              >
-                Transférer un produit
-              </p>
+        <DialogHeader className="space-y-4 pb-4 border-b">
+          <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
+            <div className="p-2 bg-primary rounded-lg">
+              <RotateCcw className="w-6 h-6 text-white" />
             </div>
-            <Badge
-              variant="outline"
-              className={cn(
-                "border-background/20",
-                isMobile
-                  ? "bg-primary/10 text-primary"
-                  : "bg-background/10 text-background"
-              )}
-            >
-              {product.name}
-            </Badge>
+            Transférer le Stock de Retour
           </DialogTitle>
-          <DialogDescription className="text-background/80 text-left">
-            Transférer ce produit au client.
+          <DialogDescription className="text-gray-600 text-base">
+            Transférer "{product.name}" depuis le stock de retour à un client.
+            Stock disponible:{" "}
+            <span className="font-semibold text-secondary">
+              {availableQuantity} unités
+            </span>
           </DialogDescription>
         </DialogHeader>
 
         {/* Form Content */}
         <div className="flex-1 px-2 md:px-0">
           <FormContent
+            availableQuantity={availableQuantity}
+            bonsForPassager={bonsForPassager}
+            totalPrice={totalPrice}
             activeClients={activeClients}
             formData={formData}
             handleFormChange={handleFormChange}
@@ -235,6 +318,7 @@ export default function TranferReturnStockToClient({
             setSelectClient={setSelectClient}
             handleAddBonNumber={handleAddBonNumber}
             product={product}
+            handleClientTypeChange={handleClientTypeChange}
           />
         </div>
 
@@ -295,12 +379,15 @@ type FormContentProps = {
   activeClients: GetActiveClientsResponse | undefined;
   handleAddBonNumber: () => void;
   product: ReturnStock;
+  handleClientTypeChange: (type: "regular" | "passager") => void;
+  availableQuantity: number;
+  totalPrice: number;
+  bonsForPassager: number[];
 };
 
 const FormContent = ({
-  setIsDropdownOpen,
+  availableQuantity,
   isBonNumberOpen,
-  isDropdownOpen,
   selectClient,
   activeClients,
   setSelectClient,
@@ -312,216 +399,260 @@ const FormContent = ({
   setIsBonNumberOpen,
   handleAddBonNumber,
   product,
+  handleClientTypeChange,
+  totalPrice,
+  bonsForPassager,
 }: FormContentProps) => {
   return (
-    <div className="space-y-6 mb-5 md:mb-0">
-      {/* First row: Client Selection & Quantity */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Select Client */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="client-select"
-            className="text-base font-medium text-background"
+    <div>
+      {/* Product Summary */}
+      <div className="bg-background/5 rounded-lg p-4 mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="font-semibold text-gray-900">{product.name}</h3>
+            <p className="text-sm text-gray-600">
+              Référence: {product.reference}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-600">Stock de retour disponible</p>
+            <p className="text-lg font-bold text-secondary">
+              {availableQuantity} unités
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Client Type Selection */}
+      <div className="mb-6">
+        <Label className="text-sm font-medium text-gray-700 mb-3 block">
+          Type de client
+        </Label>
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant={formData.clientType === "regular" ? "default" : "ghost"}
+            className={`flex items-center gap-2 flex-1 ${
+              formData.clientType === "regular"
+                ? "bg-primary "
+                : "border border-background/35"
+            }`}
+            onClick={() => handleClientTypeChange("regular")}
           >
-            Client
-          </Label>
-          <div className="relative">
-            <button
-              type="button"
-              id="client-select"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full border border-background/30 hover:border-background/50 text-sm flex justify-between items-center p-3 rounded-lg bg-foreground text-background transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+            <User className="w-4 h-4" />
+            Client Régulier
+          </Button>
+          <Button
+            type="button"
+            variant={formData.clientType === "passager" ? "default" : "ghost"}
+            className={`flex items-center gap-2 flex-1 ${
+              formData.clientType === "passager"
+                ? "bg-primary"
+                : "border border-background/35"
+            }`}
+            onClick={() => handleClientTypeChange("passager")}
+          >
+            <UserPlus className="w-4 h-4" />
+            Client Passager
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Client Information */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label
+              htmlFor="client-select"
+              className="text-sm font-medium text-gray-700"
             >
-              {selectClient ? (
-                <span className="truncate">{selectClient.name}</span>
-              ) : (
-                <span className="text-background/70">
-                  Sélectionner un client
-                </span>
-              )}
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  isDropdownOpen ? "rotate-180" : ""
-                }`}
+              {formData.clientType === "regular"
+                ? "Sélectionner un client"
+                : "Nom du client"}
+            </Label>
+            {formData.clientType === "regular" ? (
+              <SearchableDropdown
+                items={activeClients?.clients || []}
+                selectedItem={selectClient}
+                onSelect={(client) => {
+                  setSelectClient(client);
+                  const firstBonNumber =
+                    client.BonsClients[0]?.bon_number || null;
+                  setSelectBonNumber(firstBonNumber);
+                  setFormData((prevData) => ({
+                    ...prevData,
+                    clientId: client.id,
+                    bon_number: firstBonNumber,
+                  }));
+                }}
+                placeholder="Choisir un client"
+                displayValue={(client) => client.name}
+                searchFields={["name"]}
               />
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-full bg-foreground border border-background/30 rounded-lg mt-1 z-50 max-h-[200px] overflow-y-auto shadow-lg">
-                {activeClients?.clients.length === 0 ? (
-                  <div className="p-3 text-background/70 text-sm">
-                    Aucun client trouvé
-                  </div>
-                ) : (
-                  activeClients?.clients.map((client) => (
-                    <div
-                      key={client.id}
-                      className="p-3 hover:bg-background/10 cursor-pointer text-sm border-b border-background/10 last:border-b-0 transition-colors"
-                      onClick={() => {
-                        setSelectClient(client);
-                        setIsDropdownOpen(false);
-                        const firstBonNumber =
-                          client.BonsClients[0]?.bon_number || null;
-                        setSelectBonNumber(firstBonNumber);
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          clientId: client.id,
-                          bon_number: firstBonNumber,
-                        }));
-                      }}
-                    >
-                      <span>{client.name}</span>
-                    </div>
-                  ))
-                )}
-              </div>
+            ) : (
+              <Input
+                name="passagerName"
+                placeholder="Entrez le nom complet du client"
+                value={formData.passagerName || ""}
+                onChange={handleFormChange}
+                className="w-full placeholder:text-background/50"
+              />
             )}
+          </div>
+
+          {/* Date Picker */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-3">
+              <Calendar className="w-4 h-4" />
+              Date de transfert
+            </Label>
+            <DatePicker setFormData={setFormData} />
           </div>
         </div>
 
-        {/* Transfer Quantity */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="transfer-quantity"
-            className="text-base font-medium text-background"
-          >
-            Quantité
-          </Label>
-          <div className="relative">
+        {/* Quantity and Pricing */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="transfer-quantity"
+              className="text-sm font-medium text-gray-700"
+            >
+              Quantité
+            </Label>
             <Input
               name="transferQuantity"
               id="transfer-quantity"
-              className="border-background/30 hover:border-background/50 focus:border-primary/50 bg-foreground text-background p-3 rounded-lg transition-colors"
               type="number"
               min="1"
-              max={product.stockInfo.availableForTransfer}
+              max={availableQuantity}
               value={formData.transferQuantity}
               onChange={handleFormChange}
-              placeholder="Quantité à transférer"
+              className="w-full"
             />
-            <span className="absolute -bottom-5 left-0 text-xs text-background/60">
-              Max: {product.stockInfo.availableForTransfer} unités
-            </span>
+            <p className="text-xs text-gray-500">
+              Max: {availableQuantity} unités
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="price-by-unit"
+              className="text-sm font-medium text-gray-700 flex items-center gap-2"
+            >
+              <Tag className="w-4 h-4" />
+              Prix unitaire
+            </Label>
+            <Input
+              name="priceByUnit"
+              id="price-by-unit"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.priceByUnit}
+              onChange={handleFormChange}
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="total-price"
+              className="text-sm font-medium text-gray-700 flex items-center gap-2"
+            >
+              <Calculator className="w-4 h-4" />
+              Total
+            </Label>
+            <Input
+              name="totalPrice"
+              id="total-price"
+              type="number"
+              readOnly
+              value={totalPrice}
+              className="w-full bg-gray-50 font-semibold"
+            />
+            <p className="text-xs text-gray-500">Calcul automatique</p>
           </div>
         </div>
-      </div>
 
-      {/* Second row: Price & Total & Date */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Price By Unit */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="price-by-unit"
-            className="text-base font-medium text-background"
-          >
-            Prix par unité (DH)
-          </Label>
-          <Input
-            name="priceByUnit"
-            id="price-by-unit"
-            className="border-background/30 hover:border-background/50 focus:border-primary/50 bg-foreground text-background p-3 rounded-lg transition-colors"
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.priceByUnit}
-            onChange={handleFormChange}
-            placeholder="0.00"
-          />
-        </div>
-
-        {/* Total Price */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="total-price"
-            className="text-base font-medium text-background"
-          >
-            Total (DH)
-          </Label>
-          <Input
-            name="totalPrice"
-            id="total-price"
-            className="border-background/30 bg-background/5 text-background p-3 rounded-lg"
-            type="number"
-            readOnly
-            value={(formData.transferQuantity * formData.priceByUnit).toFixed(
-              2
-            )}
-          />
-        </div>
-
-        {/* Date */}
-        <div className="space-y-2">
-          <Label className="text-base font-medium text-background">Date</Label>
-          <DatePicker
-            className="w-full border-background/30 hover:border-background/50 focus:border-primary/50 bg-foreground text-background p-3 rounded-lg transition-colors"
-            setFormData={setFormData}
-            calendarClassName="bottom-full !top-auto md:top-full md:!bottom-auto"
-          />
-        </div>
-      </div>
-
-      {/* Bon Number Section */}
-      {selectClient && (
-        <div className="space-y-2">
-          <Label className="text-base font-medium text-background">
+        {/* Bon Number Section */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-gray-700">
             Numéro de bon
           </Label>
           <div className="flex gap-3">
-            <div className="relative flex-1">
-              <button
-                type="button"
-                id="bon-number-select"
-                onClick={() => setIsBonNumberOpen(!isBonNumberOpen)}
-                className="w-full border border-background/30 hover:border-background/50 text-sm flex justify-between items-center p-3 rounded-lg bg-foreground text-background transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <span className="truncate">
-                  {selectBonNumber
-                    ? `Bon #${selectBonNumber}`
-                    : "Sélectionner un bon"}
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    isBonNumberOpen ? "rotate-180" : ""
-                  }`}
+            {formData.clientType === "regular" && selectClient ? (
+              <>
+                <SearchableDropdown
+                  items={selectClient.BonsClients}
+                  selectedItem={selectClient.BonsClients.find(
+                    (b) => b.bon_number === selectBonNumber
+                  )}
+                  onSelect={(bon) => {
+                    setSelectBonNumber(bon.bon_number);
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      bon_number: bon.bon_number,
+                    }));
+                  }}
+                  placeholder="Sélectionner un bon"
+                  displayValue={(bon) => `Bon #${bon.bon_number}`}
+                  searchFields={["bon_number"]}
+                  className="flex-1"
                 />
-              </button>
-              {isBonNumberOpen && selectClient && (
-                <div className="absolute bottom-full md:top-full left-0 w-full bg-foreground border border-background/30 rounded-lg mt-1 z-50 max-h-[200px] h-fit overflow-y-auto shadow-lg">
-                  {selectClient?.BonsClients.length === 0 ? (
-                    <div className="p-3 text-background/70 text-sm">
-                      Aucun numéro de bon trouvé
+                <Button onClick={handleAddBonNumber} className="shrink-0">
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  <p className="text-white font-medium">Nouveau bon</p>
+                </Button>
+              </>
+            ) : formData.clientType === "passager" ? (
+              <>
+                <div className="flex gap-2 relative flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsBonNumberOpen(!isBonNumberOpen)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm flex justify-between items-center bg-white hover:bg-gray-50"
+                  >
+                    {selectBonNumber
+                      ? `Bon #${selectBonNumber}`
+                      : "Sélectionner un bon"}
+                    <PlusIcon className="h-4 w-4" />
+                  </button>
+                  {isBonNumberOpen && (
+                    <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 z-50 max-h-48 overflow-y-auto shadow-lg">
+                      {bonsForPassager.length === 0 ? (
+                        <div className="p-3 text-gray-500 text-sm">
+                          Aucun bon disponible
+                        </div>
+                      ) : (
+                        bonsForPassager.map((bon) => (
+                          <div
+                            key={bon}
+                            className="p-3 hover:bg-gray-50 cursor-pointer text-sm border-b last:border-b-0"
+                            onClick={() => {
+                              setSelectBonNumber(bon);
+                              setIsBonNumberOpen(false);
+                              setFormData((prevData) => ({
+                                ...prevData,
+                                bon_number: bon,
+                              }));
+                            }}
+                          >
+                            Bon #{bon}
+                          </div>
+                        ))
+                      )}
                     </div>
-                  ) : (
-                    selectClient?.BonsClients.map((bon) => (
-                      <div
-                        key={bon.bon_number}
-                        className="p-3 hover:bg-background/10 cursor-pointer text-sm border-b border-background/10 last:border-b-0 transition-colors"
-                        onClick={() => {
-                          setSelectBonNumber(bon.bon_number);
-                          setIsBonNumberOpen(false);
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            bon_number: bon.bon_number,
-                          }));
-                        }}
-                      >
-                        Bon #{bon.bon_number}
-                      </div>
-                    ))
                   )}
                 </div>
-              )}
-            </div>
-            <Button
-              onClick={handleAddBonNumber}
-              className="bg-background/10 hover:bg-background/20 text-background border border-background/30 px-4 py-3 h-full rounded-lg transition-colors"
-              variant="ghost"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              <span className="whitespace-nowrap">Nouveau bon</span>
-            </Button>
+                <Button onClick={handleAddBonNumber} className="shrink-0">
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  <p className="text-white font-medium">Nouveau bon</p>
+                </Button>
+              </>
+            ) : null}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

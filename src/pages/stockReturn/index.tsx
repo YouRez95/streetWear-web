@@ -11,7 +11,7 @@ export default function StockReturn() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(200);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedStockReturn, setSelectedStockReturn] = useState<
