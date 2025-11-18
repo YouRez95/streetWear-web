@@ -18,7 +18,7 @@ export default function Products() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(200);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedTransferTo, setSelectedTransferTo] = useState<
     "faconnier" | "client" | "stylist" | null

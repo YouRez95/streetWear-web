@@ -1,6 +1,7 @@
 import type {
   CreateOrderClientFromReturnStock,
   DeleteClientReturnStock,
+  DeleteReturnStock,
   GetReturnStock,
   GetSummaryReturnStock,
   UpdateClientReturnStock,
@@ -13,6 +14,7 @@ export const returnStockService: {
   updateClientReturnStock: UpdateClientReturnStock;
   getSummaryReturnStock: GetSummaryReturnStock;
   createOrderClientFromReturnStock: CreateOrderClientFromReturnStock;
+  deleteReturnStock: DeleteReturnStock;
 } = {
   fetchReturnStock: async ({ page, limit, search, seasonId }) => {
     try {
@@ -166,6 +168,29 @@ export const returnStockService: {
         status: "failed",
         message:
           data?.message || "No response from server. Please try again later.",
+      };
+    }
+  },
+
+  deleteReturnStock: async (seasonId, returnStockId) => {
+    try {
+      const result = await apiClient.delete(
+        `/api/v1/stock-return/delete-stock/${seasonId}/${returnStockId}`
+      );
+      return result.data;
+    } catch (error: any) {
+      const { status, data } = error.response;
+      if (status === 400 && data.errors) {
+        return {
+          status: "failed",
+          message: data.errors[0].message || "Validation error",
+        };
+      }
+
+      return {
+        status: "failed",
+        message:
+          data.message || "No response from server. Please try again later.",
       };
     }
   },

@@ -51,6 +51,7 @@ import type {
   DeleteOrderFaconnierResponse,
   DeleteOrderStylistResponse,
   DeleteProductResponse,
+  DeleteReturnStockResponse,
   DeleteWeekResponse,
   FaconnierData,
   FullSeasonData,
@@ -400,6 +401,11 @@ export type UpdateClientReturnStock = (
 export type CreateOrderClientFromReturnStock = (
   orderClientData: CreateOrderClientInput
 ) => Promise<CreateOrderClientFromReturnStockResponse>;
+
+export type DeleteReturnStock = (
+  seasonId: string,
+  stockReturnId: string
+) => Promise<DeleteReturnStockResponse>;
 
 export type GetActiveClients = (
   seasonId: string,

@@ -403,6 +403,16 @@ const FormContent = ({
   totalPrice,
   bonsForPassager,
 }: FormContentProps) => {
+  if (availableQuantity === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-600">
+          Aucune unité disponible pour le transfert de ce produit.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Product Summary */}

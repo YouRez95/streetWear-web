@@ -143,10 +143,10 @@ export type Product = {
   id: string;
   name: string;
   description?: string;
-  poids: number;
-  metrage: number;
   reference: string;
   totalQty: number;
+  poids: number;
+  metrage: number;
   type: "طبعة" | "طرزة" | "طبعة_طرزة" | null;
   productImage?: string;
   createdAt: string;
@@ -155,7 +155,8 @@ export type Product = {
     id: string;
     quantity_sent: number;
     quantity_returned: number;
-    order_status: "IN_PROGRESS" | "COMPLETED";
+    order_status: "OPEN" | "CLOSED";
+    createdAt: string;
     faconnierOrder: {
       createdAt: string;
       faconnier: {
@@ -168,6 +169,24 @@ export type Product = {
       };
     };
   }>;
+  ClientOrdersItems: {
+    id: string;
+    quantity: number;
+    returned: number;
+    passagerName: string | null;
+    createdAt: string;
+    clientOrder: {
+      createdAt: Date;
+      bon_number: {
+        bon_number: number;
+        bonStatus: "OPEN" | "CLOSED";
+      };
+      client: {
+        name: string;
+        id: string;
+      } | null;
+    };
+  }[];
   StyleTraitOrderItems: Array<{
     id: string;
     quantity_sent: number;
@@ -212,15 +231,17 @@ export type ReturnStock = {
   stockInfo: {
     totalReturned: number;
     availableForTransfer: number;
+    returnStockId: string;
     returns: {
       client: {
         id: string;
         name: string;
-      };
+      } | null;
       id: string;
       quantity: number;
       date: string;
       bonNumber: number;
+      passagerName: string | null;
     }[];
   };
 };
@@ -248,6 +269,8 @@ export type CreateProductInput = Omit<
   | "FaconnierOrderItems"
   | "type"
   | "StyleTraitOrderItems"
+  | "FaconnierOrderItems"
+  | "ClientOrdersItems"
 > & {
   productImage: ArrayBuffer | null;
   fileName: string | null;
@@ -267,6 +290,8 @@ export type UpdateProductInput = Omit<
   | "FaconnierOrderItems"
   | "type"
   | "StyleTraitOrderItems"
+  | "FaconnierOrderItems"
+  | "ClientOrdersItems"
 > & {
   productImage: ArrayBuffer | null;
   fileName: string | null;
@@ -312,6 +337,11 @@ export type CreateOrderClientFromReturnStockResponse = {
     clientId: string;
     bonId: string;
   };
+};
+
+export type DeleteReturnStockResponse = {
+  status: "success" | "failed";
+  message: string;
 };
 
 export type UpdateClientReturnStockInput = {

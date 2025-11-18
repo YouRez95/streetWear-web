@@ -110,7 +110,12 @@ export function DeleteStockReturnDialog({
           </DialogTitle>
           <DialogDescription className="text-background/80 text-left">
             Êtes-vous sûr de vouloir supprimer ce retour effectué par{" "}
-            <strong>{stockReturn.client.name}</strong> le{" "}
+            <strong>
+              {stockReturn.client
+                ? stockReturn.client.name
+                : stockReturn.passagerName}
+            </strong>{" "}
+            le{" "}
             <strong>{formatDateToDDMMYYYY(new Date(stockReturn.date))}</strong>
             ?
             <br />

@@ -211,3 +211,37 @@ export function useCreateOrderClientFromReturnStock() {
     },
   });
 }
+
+export function useDeleteReturnStock() {
+  const queryClient = useQueryClient();
+  const { activeSeason } = useUserStore();
+  const seasonId = activeSeason?.id || "";
+
+  return useMutation({
+    mutationFn: (stockReturnId: string) =>
+      returnStockService.deleteReturnStock(seasonId, stockReturnId),
+    onSuccess: async (data) => {
+      if (data.status === "failed") {
+        toast({
+          title: "Error deleting return stock",
+          description: data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Return stock deleted",
+        description: data.message || "Return stock deleted successfully",
+        variant: "default",
+      });
+    },
+    onError: (error) => showErrorToast("Error deleting return stock", error),
+    onSettled: (data) => {
+      if (data?.status === "failed") return;
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.returnStockRoot(seasonId),
+        exact: false,
+      });
+    },
+  });
+}

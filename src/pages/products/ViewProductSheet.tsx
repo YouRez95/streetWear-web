@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { formatDateToDDMMYYYY, getImageUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import type { Product } from "@/types/models";
 import { Ruler, Scale } from "lucide-react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -100,7 +100,7 @@ export default function ViewProductSheet({
           </Card>
 
           {/* Styliste History */}
-          {product.StyleTraitOrderItems.length > 0 && (
+          {/* {product.StyleTraitOrderItems.length > 0 && (
             <Card className="py-2 md:py-6">
               <CardHeader className="px-2 md:px-3">
                 <CardTitle>Historique du styliste</CardTitle>
@@ -157,7 +157,7 @@ export default function ViewProductSheet({
                 </table>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           {/* Product Status */}
           {product.ProductStatus && (

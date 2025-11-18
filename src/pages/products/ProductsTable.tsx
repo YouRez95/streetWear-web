@@ -19,8 +19,11 @@ import {
   ChevronDown,
   ChevronRight,
   Eye,
+  Package,
+  Palette,
   Pencil,
   Trash2,
+  Users,
 } from "lucide-react";
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import TransferProductDropDown from "./TransferProductDropDown";
@@ -90,7 +93,14 @@ type ProductCardProps = {
   onDelete: (product: Product) => void;
   onTransfer: (product: Product) => void;
   nestedTable: string | null;
+  expandedSection: {
+    [key: string]: "clients" | "faconniers" | "stylists" | null;
+  };
   onToggleNested: (id: string) => void;
+  onToggleSection: (
+    productId: string,
+    section: "clients" | "faconniers" | "stylists"
+  ) => void;
   setSelectedTransferTo: (
     transferTo: "faconnier" | "client" | "stylist" | null
   ) => void;
@@ -107,7 +117,9 @@ function ProductCard({
   onDelete,
   onTransfer,
   nestedTable,
+  expandedSection,
   onToggleNested,
+  onToggleSection,
   setSelectedTransferTo,
   setOpenTransferDialogClient,
   setOpenTransferDialogFaconnier,
@@ -231,77 +243,264 @@ function ProductCard({
       </div>
 
       {/* Nested Table Toggle */}
-      {product.FaconnierOrderItems.length > 0 && (
-        <button
-          onClick={() => onToggleNested(product.id)}
-          className="w-full flex items-center justify-between px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors text-blue-700 text-sm font-medium"
-        >
-          <span>Détails Faconnier ({product.FaconnierOrderItems.length})</span>
-          {nestedTable === product.id ? (
-            <ChevronDown className="w-4 h-4" />
-          ) : (
-            <ChevronRight className="w-4 h-4" />
-          )}
-        </button>
-      )}
+      <button
+        onClick={() => onToggleNested(product.id)}
+        className="w-full flex items-center justify-between px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors text-blue-700 text-sm font-medium mb-2"
+      >
+        <span>Détails du produit</span>
+        {nestedTable === product.id ? (
+          <ChevronDown className="w-4 h-4" />
+        ) : (
+          <ChevronRight className="w-4 h-4" />
+        )}
+      </button>
 
-      {/* Nested Table */}
-      {nestedTable === product.id && product.FaconnierOrderItems.length > 0 && (
-        <div className="mt-4 pt-4 border-t">
-          <div className="text-xs font-semibold text-gray-700 mb-3">
-            Commandes Faconnier
-          </div>
-          <div className="space-y-2">
-            {product.FaconnierOrderItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-gray-50 rounded-md p-3 text-xs space-y-2"
+      {/* Nested Content */}
+      {nestedTable === product.id && (
+        <div className="mt-4 pt-4 border-t space-y-3">
+          {/* CLIENT DISTRIBUTION SECTION */}
+          {(product.ClientOrdersItems?.length || 0) > 0 && (
+            <div className="bg-blue-50 rounded-lg border overflow-hidden">
+              <button
+                onClick={() => onToggleSection(product.id, "clients")}
+                className="w-full px-3 py-2 flex items-center justify-between bg-blue-100 hover:bg-blue-200 transition-colors"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-gray-900">
-                      {item.faconnierOrder.faconnier.name}
-                    </div>
-                    <div className="text-gray-600">
-                      Bon #{item.faconnierOrder.bon_number.bon_number}
-                    </div>
-                  </div>
-                  <div>
-                    {item.quantity_sent !== item.quantity_returned ? (
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        En cours
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800">Terminé</Badge>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span className="font-semibold text-gray-800 text-sm">
+                    Distribution Clients
+                  </span>
+                  <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs">
+                    {product.ClientOrdersItems?.length || 0}
+                  </Badge>
                 </div>
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200">
-                  <div>
-                    <div className="text-gray-600">Envoyé</div>
-                    <div className="font-semibold text-gray-900">
-                      {item.quantity_sent}
+                {expandedSection[product.id] === "clients" ? (
+                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                )}
+              </button>
+
+              {expandedSection[product.id] === "clients" && (
+                <div className="p-3 space-y-2">
+                  {product.ClientOrdersItems?.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-md p-3 text-xs space-y-2 border"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            {item.clientOrder.client
+                              ? item.clientOrder.client.name
+                              : `${item.passagerName} (Passager)`}
+                          </div>
+                          <div className="text-gray-600">
+                            Bon #{item.clientOrder.bon_number.bon_number}
+                          </div>
+                        </div>
+                        <Badge
+                          className={
+                            item.clientOrder.bon_number.bonStatus === "OPEN"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }
+                        >
+                          {item.clientOrder.bon_number.bonStatus === "OPEN"
+                            ? "Ouvert"
+                            : "Fermé"}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200">
+                        <div>
+                          <div className="text-gray-600">Quantité</div>
+                          <div className="font-semibold text-gray-900">
+                            {item.quantity} pcs
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">Retourné</div>
+                          <div className="font-semibold text-red-600">
+                            {item.returned} pcs
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-gray-600">
+                        {formatDateToDDMMYYYY(item.createdAt)}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-gray-600">Retourné</div>
-                    <div className="font-semibold text-gray-900">
-                      {item.quantity_returned}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-gray-600">Restant</div>
-                    <div className="font-semibold text-gray-900">
-                      {item.quantity_sent - item.quantity_returned}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-                <div className="text-gray-600 pt-1">
-                  {formatDateToDDMMYYYY(item.faconnierOrder.createdAt)}
+              )}
+            </div>
+          )}
+
+          {/* FACONNIER ORDERS SECTION */}
+          {(product.FaconnierOrderItems?.length || 0) > 0 && (
+            <div className="bg-purple-50 rounded-lg border overflow-hidden">
+              <button
+                onClick={() => onToggleSection(product.id, "faconniers")}
+                className="w-full px-3 py-2 flex items-center justify-between bg-purple-100 hover:bg-purple-200 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-purple-600" />
+                  <span className="font-semibold text-gray-800 text-sm">
+                    Commandes Faconnier
+                  </span>
+                  <Badge className="bg-purple-500 hover:bg-purple-500 text-white text-xs">
+                    {product.FaconnierOrderItems?.length || 0}
+                  </Badge>
                 </div>
+                {expandedSection[product.id] === "faconniers" ? (
+                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                )}
+              </button>
+
+              {expandedSection[product.id] === "faconniers" && (
+                <div className="p-3 space-y-2">
+                  {product.FaconnierOrderItems?.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-md p-3 text-xs space-y-2 border"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            {item.faconnierOrder.faconnier.name}
+                          </div>
+                          <div className="text-gray-600">
+                            Bon #{item.faconnierOrder.bon_number.bon_number}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          {item.quantity_sent !== item.quantity_returned ? (
+                            <Badge className="bg-orange-100 text-orange-700">
+                              En cours
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-green-100 text-green-700">
+                              Terminé
+                            </Badge>
+                          )}
+                          <Badge
+                            className={
+                              item.faconnierOrder.bon_number.bonStatus ===
+                              "OPEN"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                            }
+                          >
+                            {item.faconnierOrder.bon_number.bonStatus === "OPEN"
+                              ? "Ouvert"
+                              : "Fermé"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200">
+                        <div>
+                          <div className="text-gray-600">Envoyé</div>
+                          <div className="font-semibold text-gray-900">
+                            {item.quantity_sent}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">Retourné</div>
+                          <div className="font-semibold text-gray-900">
+                            {item.quantity_returned}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">Restant</div>
+                          <div className="font-semibold text-gray-900">
+                            {item.quantity_sent - item.quantity_returned}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-gray-600">
+                        {formatDateToDDMMYYYY(item.createdAt)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STYLIST ORDERS SECTION */}
+          {product.StyleTraitOrderItems &&
+            product.StyleTraitOrderItems.length > 0 && (
+              <div className="bg-amber-50 rounded-lg border overflow-hidden">
+                <button
+                  onClick={() => onToggleSection(product.id, "stylists")}
+                  className="w-full px-3 py-2 flex items-center justify-between bg-amber-100 hover:bg-amber-200 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-amber-600" />
+                    <span className="font-semibold text-gray-800 text-sm">
+                      Commandes Styliste
+                    </span>
+                    <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-xs">
+                      {product.StyleTraitOrderItems?.length || 0}
+                    </Badge>
+                  </div>
+                  {expandedSection[product.id] === "stylists" ? (
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  )}
+                </button>
+
+                {expandedSection[product.id] === "stylists" && (
+                  <div className="p-3 space-y-2">
+                    {product.StyleTraitOrderItems?.map((item) => (
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-md p-3 text-xs space-y-2 border"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-semibold text-gray-900">
+                              {item.styleTraitOrder.styleTrait.name}
+                            </div>
+                            <div className="text-gray-600">
+                              Bon #{item.styleTraitOrder.bon_number.bon_number}
+                            </div>
+                          </div>
+                          <Badge className="bg-amber-100 text-amber-700">
+                            {item.styleTraitOrder.styleTrait.type}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200">
+                          <div>
+                            <div className="text-gray-600">Quantité</div>
+                            <div className="font-semibold text-gray-900">
+                              {item.quantity_sent}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Prix Unitaire</div>
+                            <div className="font-semibold text-gray-900">
+                              {item.unit_price} DH
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                          <div className="text-gray-600">Total</div>
+                          <div className="font-semibold text-gray-900">
+                            {item.quantity_sent * item.unit_price} DH
+                          </div>
+                        </div>
+                        <div className="text-gray-600">
+                          {formatDateToDDMMYYYY(item.createdAt)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            )}
         </div>
       )}
     </div>
@@ -325,9 +524,28 @@ export default function ProductsTable({
   setDate,
 }: ProductsTableProps) {
   const [nestedTable, setNestedTable] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<{
+    [key: string]: "clients" | "faconniers" | "stylists" | null;
+  }>({});
 
   const handleShowNestedTable = (id: string) => {
-    setNestedTable((prev) => (prev === id ? null : id));
+    setNestedTable((prev) => {
+      if (prev === id) {
+        setExpandedSection({});
+        return null;
+      }
+      return id;
+    });
+  };
+
+  const toggleSection = (
+    productId: string,
+    section: "clients" | "faconniers" | "stylists"
+  ) => {
+    setExpandedSection((prev) => ({
+      ...prev,
+      [productId]: prev[productId] === section ? null : section,
+    }));
   };
 
   const debouncedSearchTerm = useDebounce(search, 300);
@@ -509,81 +727,402 @@ export default function ProductsTable({
                     </div>
                   </TableCell>
                 </TableRow>
+
+                {/* EXPANDED NESTED VIEW */}
                 {nestedTable === product.id && (
                   <TableRow className="">
-                    <TableCell colSpan={9} className="p-0">
-                      <div>
-                        <Table className="text-base w-full bg-muted-foreground">
-                          <TableHeader className="text-background bg-tableHead border">
-                            <TableRow className="text-base">
-                              <TableHead className="text-background">
-                                Faconnier
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Numéro de bon
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Date
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Pcs
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Retourné
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Restant
-                              </TableHead>
-                              <TableHead className="text-background">
-                                Status
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {product.FaconnierOrderItems.length === 0 && (
-                              <TableRow className="h-[55px]">
-                                <TableCell colSpan={7} className="text-center">
-                                  Aucun faconnier trouvé
-                                </TableCell>
-                              </TableRow>
+                    <TableCell colSpan={9} className="p-0 bg-muted/30">
+                      <div className="p-4 space-y-3">
+                        {/* CLIENT DISTRIBUTION SECTION */}
+                        <div className="bg-card rounded-lg border overflow-hidden shadow-sm">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSection(product.id, "clients");
+                            }}
+                            className="w-full px-4 py-3 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Users className="w-5 h-5 text-blue-600" />
+                              <span className="font-semibold text-gray-800">
+                                Distribution Clients
+                              </span>
+                              <Badge className="bg-blue-500 hover:bg-blue-500 text-white">
+                                {product.ClientOrdersItems?.length || 0} clients
+                              </Badge>
+                              <span className="text-sm text-gray-600">
+                                Total:{" "}
+                                {product.ClientOrdersItems?.reduce(
+                                  (sum, item) =>
+                                    sum + item.quantity - item.returned,
+                                  0
+                                ) || 0}{" "}
+                                pcs
+                              </span>
+                            </div>
+                            {expandedSection[product.id] === "clients" ? (
+                              <ChevronDown className="w-5 h-5 text-gray-600" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5 text-gray-600" />
                             )}
-                            {product.FaconnierOrderItems.length > 0 &&
-                              product.FaconnierOrderItems.map((item) => (
-                                <TableRow className="h-[55px]" key={item.id}>
-                                  <TableCell className="font-medium">
-                                    {item.faconnierOrder.faconnier.name}
-                                  </TableCell>
-                                  <TableCell>
-                                    bon #
-                                    {item.faconnierOrder.bon_number.bon_number}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatDateToDDMMYYYY(
-                                      item.faconnierOrder.createdAt
-                                    )}
-                                  </TableCell>
-                                  <TableCell>{item.quantity_sent}</TableCell>
-                                  <TableCell>
-                                    {item.quantity_returned}
-                                  </TableCell>
-                                  <TableCell>
-                                    {item.quantity_sent -
-                                      item.quantity_returned}
-                                  </TableCell>
-                                  <TableCell>
-                                    {item.quantity_sent !==
-                                    item.quantity_returned ? (
-                                      <p className="text-secondary">En cours</p>
-                                    ) : (
-                                      <p className="text-destructive">
-                                        Terminé
-                                      </p>
-                                    )}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
+                          </button>
+
+                          {expandedSection[product.id] === "clients" && (
+                            <div className="overflow-x-auto">
+                              <Table className="text-base">
+                                <TableHeader className="bg-muted">
+                                  <TableRow>
+                                    <TableHead className="text-background/50">
+                                      Client
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      N° Bon
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Date
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Quantité
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Retourné
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Statut Bon
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {product.ClientOrdersItems?.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell
+                                        colSpan={6}
+                                        className="text-center py-8 text-background/50"
+                                      >
+                                        Aucune distribution client pour ce
+                                        produit
+                                      </TableCell>
+                                    </TableRow>
+                                  ) : (
+                                    product.ClientOrdersItems.map((item) => (
+                                      <TableRow
+                                        key={item.id}
+                                        className="h-[50px]"
+                                      >
+                                        <TableCell className="font-medium">
+                                          {item.clientOrder.client ? (
+                                            item.clientOrder.client.name
+                                          ) : (
+                                            <span>
+                                              {item.passagerName}{" "}
+                                              <small>(Passager)</small>
+                                            </span>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          bon #
+                                          {
+                                            item.clientOrder.bon_number
+                                              .bon_number
+                                          }
+                                        </TableCell>
+                                        <TableCell>
+                                          {formatDateToDDMMYYYY(item.createdAt)}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge className="bg-blue-100 hover:bg-blue-100 text-blue-700 font-semibold">
+                                            {item.quantity} pcs
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge className="bg-red-100 hover:bg-blue-100 text-red-700 font-semibold">
+                                            {item.returned} pcs
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge
+                                            className={
+                                              item.clientOrder.bon_number
+                                                .bonStatus === "OPEN"
+                                                ? "bg-green-100 hover:bg-green-100 text-green-700"
+                                                : "bg-gray-100 hover:bg-gray-100 text-gray-700"
+                                            }
+                                          >
+                                            {item.clientOrder.bon_number
+                                              .bonStatus === "OPEN"
+                                              ? "Ouvert"
+                                              : "Fermé"}
+                                          </Badge>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* FACONNIER ORDERS SECTION */}
+                        <div className="bg-card rounded-lg border overflow-hidden shadow-sm">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSection(product.id, "faconniers");
+                            }}
+                            className="w-full px-4 py-3 flex items-center justify-between bg-purple-50 hover:bg-purple-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Package className="w-5 h-5 text-purple-600" />
+                              <span className="font-semibold text-gray-800">
+                                Commandes Faconnier
+                              </span>
+                              <Badge className="bg-purple-500 hover:bg-purple-500 text-white">
+                                {product.FaconnierOrderItems?.length || 0}{" "}
+                                commandes
+                              </Badge>
+                            </div>
+                            {expandedSection[product.id] === "faconniers" ? (
+                              <ChevronDown className="w-5 h-5 text-gray-600" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5 text-gray-600" />
+                            )}
+                          </button>
+
+                          {expandedSection[product.id] === "faconniers" && (
+                            <div className="overflow-x-auto">
+                              <Table className="text-base">
+                                <TableHeader className="bg-muted">
+                                  <TableRow>
+                                    <TableHead className="text-background/50">
+                                      Faconnier
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      N° Bon
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Date
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Envoyé
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Retourné
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Restant
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Statut Bon
+                                    </TableHead>
+                                    <TableHead className="text-background/50">
+                                      Statut Commande
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {product.FaconnierOrderItems?.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell
+                                        colSpan={8}
+                                        className="text-center py-8 text-background/50"
+                                      >
+                                        Aucune commande faconnier
+                                      </TableCell>
+                                    </TableRow>
+                                  ) : (
+                                    product.FaconnierOrderItems?.map((item) => (
+                                      <TableRow
+                                        key={item.id}
+                                        className="h-[50px]"
+                                      >
+                                        <TableCell className="font-medium">
+                                          {item.faconnierOrder.faconnier.name}
+                                        </TableCell>
+                                        <TableCell>
+                                          bon #
+                                          {
+                                            item.faconnierOrder.bon_number
+                                              .bon_number
+                                          }
+                                        </TableCell>
+                                        <TableCell>
+                                          {formatDateToDDMMYYYY(item.createdAt)}
+                                        </TableCell>
+                                        <TableCell>
+                                          {item.quantity_sent}
+                                        </TableCell>
+                                        <TableCell>
+                                          {item.quantity_returned}
+                                        </TableCell>
+                                        <TableCell className="font-semibold">
+                                          {item.quantity_sent -
+                                            item.quantity_returned}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge
+                                            className={
+                                              item.faconnierOrder.bon_number
+                                                .bonStatus === "OPEN"
+                                                ? "bg-green-100 hover:bg-green-100 text-green-700"
+                                                : "bg-gray-100 hover:bg-gray-100 text-gray-700"
+                                            }
+                                          >
+                                            {item.faconnierOrder.bon_number
+                                              .bonStatus === "OPEN"
+                                              ? "Ouvert"
+                                              : "Fermé"}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          {item.quantity_sent !==
+                                          item.quantity_returned ? (
+                                            <Badge className="bg-orange-100 hover:bg-orange-100 text-orange-700">
+                                              En cours
+                                            </Badge>
+                                          ) : (
+                                            <Badge className="bg-green-100 hover:bg-green-100 text-green-700">
+                                              Terminé
+                                            </Badge>
+                                          )}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* STYLIST ORDERS SECTION */}
+                        {product.StyleTraitOrderItems &&
+                          product.StyleTraitOrderItems.length > 0 && (
+                            <div className="bg-card rounded-lg border overflow-hidden shadow-sm">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSection(product.id, "stylists");
+                                }}
+                                className="w-full px-4 py-3 flex items-center justify-between bg-amber-50 hover:bg-amber-100 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Palette className="w-5 h-5 text-amber-600" />
+                                  <span className="font-semibold text-gray-800">
+                                    Commandes Styliste
+                                  </span>
+                                  <Badge className="bg-amber-500 hover:bg-amber-500 text-white">
+                                    {product.StyleTraitOrderItems?.length || 0}{" "}
+                                    commandes
+                                  </Badge>
+                                </div>
+                                {expandedSection[product.id] === "stylists" ? (
+                                  <ChevronDown className="w-5 h-5 text-gray-600" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                                )}
+                              </button>
+
+                              {expandedSection[product.id] === "stylists" && (
+                                <div className="overflow-x-auto">
+                                  <Table className="text-base">
+                                    <TableHeader className="bg-muted">
+                                      <TableRow>
+                                        <TableHead className="text-background/50">
+                                          Styliste
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Type
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          N° Bon
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Date
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Quantité
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Prix Unitaire
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Total
+                                        </TableHead>
+                                        <TableHead className="text-background/50">
+                                          Statut Bon
+                                        </TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {product.StyleTraitOrderItems?.map(
+                                        (item) => (
+                                          <TableRow
+                                            key={item.id}
+                                            className="h-[50px]"
+                                          >
+                                            <TableCell className="font-medium">
+                                              {
+                                                item.styleTraitOrder.styleTrait
+                                                  .name
+                                              }
+                                            </TableCell>
+                                            <TableCell>
+                                              <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-700">
+                                                {
+                                                  item.styleTraitOrder
+                                                    .styleTrait.type
+                                                }
+                                              </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                              bon #
+                                              {
+                                                item.styleTraitOrder.bon_number
+                                                  .bon_number
+                                              }
+                                            </TableCell>
+                                            <TableCell>
+                                              {formatDateToDDMMYYYY(
+                                                item.createdAt
+                                              )}
+                                            </TableCell>
+                                            <TableCell>
+                                              {item.quantity_sent}
+                                            </TableCell>
+                                            <TableCell>
+                                              {item.unit_price} DH
+                                            </TableCell>
+                                            <TableCell className="font-semibold">
+                                              {item.quantity_sent *
+                                                item.unit_price}{" "}
+                                              DH
+                                            </TableCell>
+                                            <TableCell>
+                                              <Badge
+                                                className={
+                                                  item.styleTraitOrder
+                                                    .bon_number.bonStatus ===
+                                                  "OPEN"
+                                                    ? "bg-green-100 hover:bg-green-100 text-green-700"
+                                                    : "bg-gray-100 hover:bg-gray-100 text-gray-700"
+                                                }
+                                              >
+                                                {item.styleTraitOrder.bon_number
+                                                  .bonStatus === "OPEN"
+                                                  ? "Ouvert"
+                                                  : "Fermé"}
+                                              </Badge>
+                                            </TableCell>
+                                          </TableRow>
+                                        )
+                                      )}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+                            </div>
+                          )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -615,7 +1154,9 @@ export default function ProductsTable({
             key={product.id}
             product={product}
             nestedTable={nestedTable}
+            expandedSection={expandedSection}
             onToggleNested={handleShowNestedTable}
+            onToggleSection={toggleSection}
             onView={(p: any) => {
               setSelectedProduct(p);
               setOpenSheet(true);
