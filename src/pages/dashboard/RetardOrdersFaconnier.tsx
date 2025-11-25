@@ -82,7 +82,7 @@ export default function RetardOrdersFaconnier() {
                     <img
                       src={getImageUrl(faconnier.productImage, "product")}
                       alt={faconnier.productName}
-                      className="w-14 h-14 rounded-lg object-cover"
+                      className="w-14 h-14 rounded-lg object-cover bg-gray-100 border"
                       onError={(e) => {
                         const target = e.currentTarget;
                         target.src = defaultProductImage;
@@ -135,7 +135,7 @@ export default function RetardOrdersFaconnier() {
               <img
                 src={getImageUrl(faconnier.productImage, "product")}
                 alt={faconnier.productName}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0 bg-gray-100 border"
                 onError={(e) => {
                   const target = e.currentTarget;
                   target.src = defaultProductImage;

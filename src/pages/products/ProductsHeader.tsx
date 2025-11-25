@@ -33,7 +33,8 @@ export default function ProductsHeader() {
     (data?.totalStatusResult.raw_in_stock || 0) +
     (data?.totalStatusResult.quantity_at_faconnier || 0) +
     (data?.totalStatusResult.quantity_ready || 0) +
-    (data?.totalStatusResult.quantity_with_client || 0);
+    (data?.totalStatusResult.quantity_with_client || 0) +
+    (data?.totalStatusResult.quantity_returned_client || 0);
 
   const stats: Stat[] = [
     {

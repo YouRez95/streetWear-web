@@ -173,7 +173,7 @@ export default function FaconnierTable({
                         effect="blur"
                         src={getImageUrl(order.productImage, "product")}
                         alt={order.id}
-                        className="w-14 h-14 rounded-lg"
+                        className="w-14 h-14 rounded-lg bg-gray-100 border"
                         onError={(e) => {
                           const target = e.currentTarget;
                           target.src = defaultProductImage;

@@ -94,7 +94,7 @@ const ProductOrderRow = memo(
               effect="blur"
               src={getImageUrl(order.productImage, "product")}
               alt={order.id}
-              className="w-14 h-14 rounded-lg object-cover"
+              className="w-14 h-14 rounded-lg object-cover bg-gray-100 border"
               onError={(e) => {
                 const target = e.currentTarget;
                 target.src = defaultProductImage;

@@ -482,7 +482,7 @@ const FormContent = ({
                           const target = e.currentTarget;
                           target.src = defaultProductImage;
                         }}
-                        className="w-16 h-16 object-cover rounded"
+                        className="w-16 h-16 object-cover rounded bg-gray-100 border"
                         loading="lazy"
                         effect="blur"
                       />

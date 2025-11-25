@@ -130,7 +130,7 @@ export default function StockReturnTable({
                         effect="blur"
                         src={getImageUrl(product.productImage, "product")}
                         alt={product.name}
-                        className="w-10 h-10 rounded-md object-cover border"
+                        className="w-10 h-10 rounded-md object-cover border bg-gray-100"
                         onError={(e) => {
                           e.currentTarget.src = defaultProductImage;
                         }}

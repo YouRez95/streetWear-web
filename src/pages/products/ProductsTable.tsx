@@ -134,7 +134,7 @@ function ProductCard({
           loading="lazy"
           alt={product.id}
           effect="blur"
-          className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+          className="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-gray-100 border"
           onError={(e) => {
             e.currentTarget.src = defaultProductImage;
           }}
@@ -638,7 +638,7 @@ export default function ProductsTable({
                         loading="lazy"
                         alt={product.id}
                         effect="blur"
-                        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                        className="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-gray-100 border"
                         onError={(e) => {
                           e.currentTarget.src = defaultProductImage;
                         }}

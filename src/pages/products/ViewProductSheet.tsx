@@ -44,7 +44,7 @@ export default function ViewProductSheet({
                 alt={product.name}
                 loading="lazy"
                 effect="blur"
-                className="w-full h-[280px] object-contain rounded-lg"
+                className="w-full h-[280px] object-contain rounded-lg bg-gray-100 border"
                 onError={(e) => {
                   e.currentTarget.src = defaultProductImage;
                 }}
